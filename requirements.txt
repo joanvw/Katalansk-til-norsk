@@ -1,0 +1,10 @@
+# Kjernefunksjonaliteten (detektor + mock-transport + tester) bruker kun
+# Pythons standardbibliotek.
+#
+# For deteksjon mot ekte maskinvare via OlaRDMTransport trengs Open Lighting
+# Architecture med Python-bindinger. Denne installeres normalt via systemets
+# pakkebehandler (f.eks. `apt install ola ola-python`), ikke pip:
+#   https://www.openlighting.org/ola/getting-started/
+#
+# Utvikling/test:
+pytest>=7.0
