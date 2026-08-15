@@ -6,5 +6,12 @@
 # pakkebehandler (f.eks. `apt install ola ola-python`), ikke pip:
 #   https://www.openlighting.org/ola/getting-started/
 #
+# For coach-pakkens AI-analysator (coach.AIAnalysator + AnthropicKlient) trengs
+# Anthropics offisielle SDK. Kjernen i coach (regelbasert analyse, opptak,
+# profilarkiv) bruker kun standardbiblioteket – SDK-et er kun for ekte
+# KI-kjøring, og importeres først når AnthropicKlient opprettes:
+#   anthropic>=0.40
+# Krever også ANTHROPIC_API_KEY (eller en aktiv `ant auth login`-profil).
+#
 # Utvikling/test:
 pytest>=7.0

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Nøkler appen trenger. I moderne Xcode-prosjekter kan disse også settes
+  under target → Info. Verdiene vises for brukeren når det bes om tilgang.
+-->
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>NSMicrophoneUsageDescription</key>
+    <string>Appen tar opp lyd fra situasjonen slik at du kan få coaching i etterkant.</string>
+
+    <key>NSSpeechRecognitionUsageDescription</key>
+    <string>Talen transkriberes på enheten din. Kun teksten sendes til analyse – ikke lyden.</string>
+
+    <key>NSCameraUsageDescription</key>
+    <string>Brukes hvis du vil ta opp video i tillegg til lyd.</string>
+
+    <!--
+      Kun for utvikling mot en lokal backend over http. Fjern dette (eller
+      bruk https) i produksjon.
+    -->
+    <key>NSAppTransportSecurity</key>
+    <dict>
+        <key>NSAllowsLocalNetworking</key>
+        <true/>
+    </dict>
+</dict>
+</plist>
