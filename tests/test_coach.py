@@ -7,6 +7,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from coach import (  # noqa: E402
     Agenda,
+    AIAnalysator,
     Coach,
     Deltaker,
     Driver,
@@ -19,6 +20,7 @@ from coach import (  # noqa: E402
     Opptaksmodus,
     Opptaksstatus,
     ProfilArkiv,
+    RegelbasertAnalysator,
     Situasjon,
     ØnsketUtkomme,
     forbered,
@@ -161,6 +163,86 @@ def test_arkiv_lagres_og_lastes_fra_json(tmp_path):
     assert hentet is not None
     assert hentet.typisk_rolle == "kunde"
     assert Driver.TRYGGHET in hentet.antatte_drivere
+
+
+# -- AI-analysator (uten nett, via falsk KI-klient) --------------------
+class _FalskKlient:
+    """Falsk KIKlient: fanger prompten og returnerer et fast JSON-svar."""
+
+    def __init__(self, svar: dict):
+        self.svar = svar
+        self.sett_system = ""
+        self.sett_bruker = ""
+        self.sett_skjema: dict = {}
+
+    def analyser_json(self, system, bruker, skjema):
+        self.sett_system = system
+        self.sett_bruker = bruker
+        self.sett_skjema = skjema
+        return self.svar
+
+
+def test_ai_analysator_oversetter_json_til_tilbakemelding():
+    svar = {
+        "styrker": ["God lytting"],
+        "forbedringsområder": ["Snakket for mye"],
+        "per_deltaker": [
+            {
+                "rolle": "leder",
+                "observerte_drivere": ["kontroll", "status"],
+                "forbedring_dialog": ["Gi tydelige rammer"],
+            }
+        ],
+        "utkomme_vurdering": [
+            {"utkomme": "et større felles eierskap", "vurdering": "Delvis nådd"}
+        ],
+        "neste_øving": ["Øv på pauser"],
+    }
+    klient = _FalskKlient(svar)
+    coach = Coach(MockOpptaker(), MinneLagring(), analysator=AIAnalysator(klient))
+    økt = coach.ny_økt(_oppsett())
+
+    tb = coach.analyser(økt, Observasjoner(transkripsjon="Hei, la oss starte..."))
+
+    assert tb.styrker == ["God lytting"]
+    assert tb.forbedringsområder == ["Snakket for mye"]
+    (dt,) = tb.per_deltaker
+    assert dt.rolle == "leder"
+    assert dt.observerte_drivere == [Driver.KONTROLL, Driver.STATUS]
+    assert tb.utkomme_vurdering[ØnsketUtkomme.FELLES_EIERSKAP] == "Delvis nådd"
+    # Transkripsjonen og oppsettet skal ha nådd prompten.
+    assert "Hei, la oss starte" in klient.sett_bruker
+    assert "møte på jobben" in klient.sett_bruker
+
+
+def test_ai_analysator_ignorerer_ugyldige_drivere():
+    svar = {
+        "styrker": [],
+        "forbedringsområder": [],
+        "per_deltaker": [
+            {"rolle": "leder", "observerte_drivere": ["tull", "kontroll"], "forbedring_dialog": []}
+        ],
+        "utkomme_vurdering": [],
+        "neste_øving": [],
+    }
+    coach = Coach(MockOpptaker(), MinneLagring(), analysator=AIAnalysator(_FalskKlient(svar)))
+    økt = coach.ny_økt(_oppsett())
+    tb = coach.analyser(økt, Observasjoner())
+    (dt,) = tb.per_deltaker
+    assert dt.observerte_drivere == [Driver.KONTROLL]  # "tull" hoppet over
+
+
+def test_ai_analysator_faller_tilbake_ved_feil():
+    class _Kræsjklient:
+        def analyser_json(self, system, bruker, skjema):
+            raise RuntimeError("nettverksfeil")
+
+    analysator = AIAnalysator(_Kræsjklient(), reserve=RegelbasertAnalysator())
+    coach = Coach(MockOpptaker(), MinneLagring(), analysator=analysator)
+    økt = coach.ny_økt(_oppsett())
+    # Skal ikke kaste – reserven (regelbasert) overtar.
+    tb = coach.analyser(økt, Observasjoner(min_taletid_andel=0.7))
+    assert any("70 %" in f for f in tb.forbedringsområder)
 
 
 if __name__ == "__main__":

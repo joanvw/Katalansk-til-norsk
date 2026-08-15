@@ -30,10 +30,42 @@ maskinvare- og plattformavhengige delene ligger bak protokoller, akkurat som
 | ---------------- | ------------------------------ | -------------------- | --------------------------------- |
 | `Opptaker`       | kilde for lyd/bilde            | `MockOpptaker`       | mobilens kamera/mikrofon          |
 | `Lagringsmål`    | hvor mediet lagres             | `MinneLagring`, `LokalLagring` | skytjeneste / mobilens fillager |
-| `Analysator`     | analyse av opptaket            | `RegelbasertAnalysator` | en AI som tolker transkripsjon/video |
+| `Analysator`     | analyse av opptaket            | `RegelbasertAnalysator` | `AIAnalysator` (språkmodell)     |
 
 En mobilapp implementerer bare disse tre protokollene – resten av pakken
 gjenbrukes uendret.
+
+## KI-analysator
+
+`AIAnalysator` lar en språkmodell tolke transkripsjonen av opptaket og gi
+tydelig, utviklende tilbakemelding. Den følger samme mønster: selve kallet til
+modellen ligger bak en `KIKlient`-protokoll, slik at analysatoren kan testes
+uten nett med en falsk klient. `AnthropicKlient` er den ekte implementasjonen –
+den bruker Anthropics offisielle SDK og *strukturerte utdata*, så modellen
+alltid svarer med gyldig JSON på `Tilbakemelding`-formen.
+
+```python
+from coach import (
+    Coach, MockOpptaker, MinneLagring, ProfilArkiv,
+    AIAnalysator, AnthropicKlient, RegelbasertAnalysator, Observasjoner,
+)
+
+coach = Coach(
+    opptaker=MockOpptaker(),
+    lagringsmål=MinneLagring(),
+    arkiv=ProfilArkiv(salt="din-hemmelighet"),
+    # Falbacker til regelbasert analyse hvis KI-kallet feiler:
+    analysator=AIAnalysator(AnthropicKlient(), reserve=RegelbasertAnalysator()),
+)
+
+# ... oppsett, opptak som før ...
+tb = coach.analyser(økt, Observasjoner(transkripsjon=transkripsjon))
+```
+
+`AnthropicKlient` krever `pip install anthropic` og at `ANTHROPIC_API_KEY` er
+satt (eller en aktiv `ant auth login`-profil). SDK-et importeres først når
+`AnthropicKlient` opprettes, så kjernen i pakken forblir avhengighetsfri.
+Standardmodellen er `claude-opus-5`; bytt med `AnthropicKlient(modell=...)`.
 
 ## Bruk
 

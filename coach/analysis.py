@@ -36,6 +36,9 @@ class Observasjoner:
     # ønsket utkomme -> ble det nådd?
     naadde_utkommer: dict[ØnsketUtkomme, bool] = field(default_factory=dict)
     egne_notater: list[str] = field(default_factory=list)
+    # Rå transkripsjon av opptaket. Brukes av AIAnalysator; den regelbaserte
+    # analysatoren trenger den ikke.
+    transkripsjon: str = ""
 
 
 class Analysator(Protocol):

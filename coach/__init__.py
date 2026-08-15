@@ -13,6 +13,12 @@ og ``Analysator``, på samme måte som ``dmx_spot_detect`` kobler på ekte
 DMX-maskinvare.
 """
 
+from .ai_analysis import (
+    AIAnalysator,
+    AnthropicKlient,
+    KIKlient,
+    STANDARD_MODELL,
+)
 from .analysis import Analysator, Observasjoner, RegelbasertAnalysator
 from .coach import Coach
 from .models import (
@@ -85,4 +91,9 @@ __all__ = [
     "Analysator",
     "RegelbasertAnalysator",
     "Observasjoner",
+    # KI-analyse
+    "AIAnalysator",
+    "AnthropicKlient",
+    "KIKlient",
+    "STANDARD_MODELL",
 ]
