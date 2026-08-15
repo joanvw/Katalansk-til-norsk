@@ -1,9 +1,15 @@
-# Kjernen i coach (regelbasert analyse, opptak, profilarkiv) bruker kun
+# Kjernefunksjonaliteten (detektor + mock-transport + tester) bruker kun
 # Pythons standardbibliotek.
 #
+# For deteksjon mot ekte maskinvare via OlaRDMTransport trengs Open Lighting
+# Architecture med Python-bindinger. Denne installeres normalt via systemets
+# pakkebehandler (f.eks. `apt install ola ola-python`), ikke pip:
+#   https://www.openlighting.org/ola/getting-started/
+#
 # For coach-pakkens AI-analysator (coach.AIAnalysator + AnthropicKlient) trengs
-# Anthropics offisielle SDK. SDK-et er kun for ekte KI-kjøring, og importeres
-# først når AnthropicKlient opprettes:
+# Anthropics offisielle SDK. Kjernen i coach (regelbasert analyse, opptak,
+# profilarkiv) bruker kun standardbiblioteket – SDK-et er kun for ekte
+# KI-kjøring, og importeres først når AnthropicKlient opprettes:
 #   anthropic>=0.40
 # Krever også ANTHROPIC_API_KEY (eller en aktiv `ant auth login`-profil).
 #
