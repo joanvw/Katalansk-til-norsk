@@ -109,6 +109,40 @@ Kommandolinje-demo (kjører hele løpet med simulert opptak):
 python -m coach --demo
 ```
 
+## HTTP-backend (for mobilapp)
+
+`coach.web` er en avhengighetsfri backend (bygget på `http.server`) som en
+iPhone-app kan snakke med. Opptak av lyd/bilde og lagring skjer *på telefonen*
+(AVFoundation, Files/iCloud); appen sender bare oppsett og transkripsjon hit, og
+API-nøkkelen til språkmodellen bor på serveren – aldri i appen.
+
+```bash
+python -m coach.web --port 8000
+```
+
+| Endepunkt        | Metode | Hva                                                        |
+| ---------------- | ------ | ---------------------------------------------------------- |
+| `/helse`         | GET    | Helsesjekk (`{"status": "ok"}`)                            |
+| `/valg`          | GET    | Alle ferdigdefinerte valg til avkrysningsskjemaet          |
+| `/forbered`      | POST   | `Møteoppsett` inn → forberedelse (drivere + tips) ut       |
+| `/analyser`      | POST   | `{oppsett, observasjoner}` inn → `Tilbakemelding` ut       |
+
+`/analyser` bruker `AIAnalysator` automatisk hvis `ANTHROPIC_API_KEY` er satt,
+ellers `RegelbasertAnalysator` (og faller alltid tilbake til den regelbaserte
+hvis KI-kallet feiler). Rutingen ligger i den rene funksjonen `coach.web.behandle`,
+så den kan testes uten sockets.
+
+Eksempel:
+
+```bash
+curl -s -X POST http://127.0.0.1:8000/forbered -H 'Content-Type: application/json' -d '{
+  "situasjon": "kunderepresentasjon", "opplevd_rolle": "teamdeltager",
+  "faktisk_rolle": "møteleder", "agenda": "relasjonsbygging", "møtested": "hos kunde",
+  "deltakere": [{"rolle": "kunde", "antall": 2}],
+  "ønskede_utkommer": ["bedre relasjon med kunde"]
+}'
+```
+
 ## Personvern
 
 Profilarkivet lagrer **aldri** navn eller identifiserende data. Du oppgir et
