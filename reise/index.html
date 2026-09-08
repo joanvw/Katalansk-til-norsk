@@ -1029,15 +1029,24 @@ function matchText(q){
   });
   return best ? best.e : null;
 }
+/* Samme segmentlogikk som matchText: hele strengen, så hvert ord.
+   Ellers gir «Storgata 5, Moss» ingen forslag mens du skriver, og
+   feltets egen forhåndsutfylling («Oslo & Østlandet») heller ikke. */
 function suggest(q){
-  const t = norm(q);
-  if(t.length < 2) return [];
-  const hits = GAZ_INDEX.filter(function(e){ return e.n.indexOf(t) > -1; });
-  hits.sort(function(a,b){
-    const ai = a.n.indexOf(t), bi = b.n.indexOf(t);
-    return ai - bi || a.n.length - b.n.length;
+  const whole = norm(q);
+  if(whole.length < 2) return [];
+  const segs = [whole].concat(whole.split(" ")).filter(function(x){ return x.length >= 2; });
+  const seen = {}, out = [];
+  segs.forEach(function(seg){
+    GAZ_INDEX.forEach(function(e){
+      const i = e.n.indexOf(seg);
+      if(i < 0 || seen[e.name]) return;
+      seen[e.name] = 1;
+      out.push({e:e, rank:(i === 0 ? 0 : 100) + e.n.length + (seg === whole ? 0 : 50)});
+    });
   });
-  return hits.slice(0,6);
+  out.sort(function(a,b){ return a.rank - b.rank; });
+  return out.slice(0,6).map(function(x){ return x.e; });
 }
 
 /* Koordinater direkte, eller hentet ut av en Google Maps-lenke. */
@@ -1362,6 +1371,11 @@ function wireLocation(){
 
     COMMIT[side] = commit;
 
+    input.addEventListener("focus", function(){
+      input.select();
+      const hits = suggest(input.value);
+      if(hits.length) openList(hits);
+    });
     input.addEventListener("input", function(){
       if(/^https?:/i.test(input.value) || parseCoords(input.value)){ closeList(); return; }
       openList(suggest(input.value));
