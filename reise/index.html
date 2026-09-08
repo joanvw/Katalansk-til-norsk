@@ -95,10 +95,10 @@ h1{font-size:clamp(38px,6vw,60px);line-height:1.02;font-weight:700;letter-spacin
 @media (max-width:900px){.main{grid-template-columns:1fr;gap:26px}}
 
 /* ---- controls ---- */
-.panel{position:sticky;top:20px;background:var(--surface);border:1px solid var(--line);border-radius:4px;padding:22px;display:grid;gap:20px;box-shadow:var(--shadow)}
+.panel{position:sticky;top:20px;background:var(--surface);border:1px solid var(--line);border-radius:4px;padding:22px;display:grid;grid-template-columns:minmax(0,1fr);gap:20px;box-shadow:var(--shadow)}
 @media (max-width:900px){.panel{position:static}}
 .panel h2{font-size:13px;font-family:"IBM Plex Mono",ui-monospace,monospace;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3)}
-.field{display:grid;gap:7px}
+.field{display:grid;grid-template-columns:minmax(0,1fr);gap:7px;min-width:0}
 .field > label{font-size:12.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-2);font-weight:700}
 select{
   width:100%;appearance:none;background:var(--ground);color:var(--ink);
@@ -205,6 +205,31 @@ td em{font-style:normal;color:var(--ink-2)}
 .trap p{margin:0;font-size:14.5px;color:var(--ink-2)}
 .trap .where{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:10.5px;letter-spacing:.11em;text-transform:uppercase;color:var(--ink-3)}
 
+/* ---- stedsøk ---- */
+.loc{display:flex;gap:6px;min-width:0}
+.loc input{flex:1;min-width:0;background:var(--ground);color:var(--ink);border:1px solid var(--line-2);border-radius:3px;padding:11px 12px;font-family:inherit;font-size:15px}
+.loc input::placeholder{color:var(--ink-3)}
+.loc input:focus-visible,.mini:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.mini{background:var(--surface-2);border:1px solid var(--line-2);border-radius:3px;color:var(--ink-2);font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:11px;letter-spacing:.03em;padding:0 10px;cursor:pointer;white-space:nowrap}
+.mini:hover{border-color:var(--accent);color:var(--accent)}
+.mini[disabled]{opacity:.5;cursor:progress}
+.sugg{min-width:0;list-style:none;margin:0;padding:4px;border:1px solid var(--line-2);border-radius:3px;background:var(--surface);display:grid;gap:1px;max-height:216px;overflow:auto}
+.sugg li{padding:7px 9px;cursor:pointer;font-size:14px;border-radius:2px;display:flex;justify-content:space-between;gap:10px;align-items:baseline}
+.sugg li:hover,.sugg li.on{background:var(--accent-soft);color:var(--accent)}
+.sugg li em{font-style:normal;color:var(--ink-3);font-size:11.5px;font-family:"IBM Plex Mono",ui-monospace,monospace;white-space:nowrap}
+.res{margin:0;font-size:12.5px;line-height:1.45;color:var(--ink-2)}
+.res b{color:var(--accent);font-weight:700}
+.res.warn{color:var(--cheap)}
+.res .ask{background:none;border:0;padding:0;margin-left:4px;font:inherit;color:var(--accent);text-decoration:underline;cursor:pointer}
+select.sub{padding:8px 30px 8px 10px;font-size:13.5px;color:var(--ink-2)}
+.maplink{
+  display:inline-flex;align-items:center;gap:7px;text-decoration:none;
+  border:1px solid var(--accent);color:var(--accent);border-radius:3px;
+  padding:7px 12px;font-size:13.5px;font-weight:700;white-space:nowrap;
+}
+.maplink:hover{background:var(--accent-soft)}
+.route-head{align-items:center}
+
 /* ---- steder underveis ---- */
 .places{display:grid;grid-template-columns:repeat(auto-fit,minmax(298px,1fr));gap:0 34px}
 .place{padding:15px 0 17px;border-top:1px solid var(--line)}
@@ -243,12 +268,23 @@ footer p{margin:0 0 6px;max-width:70ch}
     <form class="panel" id="panel" onsubmit="return false">
       <h2>Reisen din</h2>
       <div class="field">
-        <label for="from">Fra</label>
-        <select id="from"></select>
+        <label for="fromq">Fra</label>
+        <div class="loc">
+          <input id="fromq" type="text" autocomplete="off" spellcheck="false" placeholder="Adresse, sted eller Maps-lenke">
+          <button type="button" class="mini" id="geobtn">Min posisjon</button>
+        </div>
+        <ul class="sugg" id="fromsugg" hidden></ul>
+        <p class="res" id="fromres"></p>
+        <select id="from" class="sub" aria-label="Område for startpunktet"></select>
       </div>
       <div class="field">
-        <label for="to">Til</label>
-        <select id="to"></select>
+        <label for="toq">Til</label>
+        <div class="loc">
+          <input id="toq" type="text" autocomplete="off" spellcheck="false" placeholder="Adresse, sted eller Maps-lenke">
+        </div>
+        <ul class="sugg" id="tosugg" hidden></ul>
+        <p class="res" id="tores"></p>
+        <select id="to" class="sub" aria-label="Område for målet"></select>
       </div>
       <button type="button" class="swap" id="swap">↕ Bytt retning</button>
       <div class="field">
@@ -267,7 +303,8 @@ footer p{margin:0 0 6px;max-width:70ch}
           <button type="button" data-v="gear">Utstyr</button>
         </div>
       </div>
-      <p class="panel-note">Prisnivå er vist som <b>€ / €€ / €€€</b> i stedet for kroner, fordi takstene endrer seg raskere enn en side som denne. Tidene er dør-til-dør-anslag for én etappe.</p>
+      <p class="panel-note">Skriv en adresse, et stedsnavn, koordinater eller lim inn en Google Maps-lenke. Siden slår opp mot en innebygd stedsliste med 240 stedsnavn — den har ingen forbindelse til Googles tjenester.<span id="samplenote"></span> Knappen «Åpne i Google Maps» tar deg videre til faktiske avganger.</p>
+      <p class="panel-note" style="border-top:0;padding-top:0">Prisnivå er vist som <b>€ / €€ / €€€</b> i stedet for kroner, fordi takstene endrer seg raskere enn en side som denne. Tidene er dør-til-dør-anslag for én etappe.</p>
     </form>
 
     <section id="result" aria-live="polite"></section>
@@ -908,13 +945,153 @@ const CALENDAR = [
 const MONTHS = ["","Januar","Februar","Mars","April","Mai","Juni","Juli","August","September","Oktober","November","Desember"];
 </script>
 <script>
+/* ---------------------------------------------------------------
+   Stedsøk. Siden har ingen nettilgang: adresser løses mot en
+   innebygd stedsliste, mot koordinater, eller ved å spørre Claude.
+--------------------------------------------------------------- */
+const AREA_LL = {
+  oslo:[59.911,10.752], nesodden:[59.847,10.657], moss:[59.435,10.659],
+  horten:[59.417,10.483], hadeland:[60.394,10.567], eidsvoll:[60.328,11.263],
+  kongsberg:[59.665,9.650], bergen:[60.393,5.325], stavanger:[58.970,5.733],
+  trondheim:[63.430,10.395], tromso:[69.649,18.956],
+  reykjavik:[64.146,-21.942], akureyri:[65.683,-18.089], island:[64.500,-18.500],
+  barcelona:[41.387,2.170], girona:[41.984,2.825], tarragona:[41.119,1.245],
+  pirineus:[41.617,0.622], madrid:[40.417,-3.703], valencia:[39.470,-0.376]
+};
+const NO_SNAP = {norge:1, spania:1, europa:1};
+
+const GAZ = {
+  oslo:["Oslo","Oslo S","Oslo sentrum","Gardermoen","Oslo lufthavn","Jessheim","Lillestrøm","Sandvika","Asker","Bærum","Grünerløkka","Tøyen","Majorstuen","Frogner","Bygdøy","Holmenkollen","Ski","Ås","Vestby","Kolbotn","Drøbak","Nittedal","Lørenskog","Fornebu","Grorud"],
+  nesodden:["Nesodden","Nesoddtangen","Fagerstrand","Fjellstrand","Hellviktangen","Blylaget"],
+  moss:["Moss","Jeløy","Rygge","Kambo","Fredrikstad","Sarpsborg","Halden","Askim","Mysen","Østfold"],
+  horten:["Horten","Skoppum","Åsgårdstrand","Borre","Holmestrand","Nykirke","Tønsberg","Sandefjord","Larvik","Torp","Vestfold"],
+  hadeland:["Hadeland","Gran","Jaren","Brandbu","Lunner","Roa","Grua","Harestua","Jevnaker","Gjøvik","Hamar","Lillehammer","Elverum","Innlandet"],
+  eidsvoll:["Eidsvoll","Eidsvoll Verk","Råholt","Dal","Minnesund","Hurdal"],
+  kongsberg:["Kongsberg","Hokksund","Vestfossen","Drammen","Mjøndalen","Hønefoss","Ringerike","Buskerud"],
+  bergen:["Bergen","Flesland","Voss","Askøy","Åsane","Fana","Sotra","Vestland"],
+  stavanger:["Stavanger","Sandnes","Sola","Bryne","Jæren","Haugesund","Rogaland"],
+  trondheim:["Trondheim","Værnes","Stjørdal","Steinkjer","Levanger","Røros","Trøndelag"],
+  tromso:["Tromsø","Langnes","Harstad","Narvik","Bodø","Alta","Finnsnes","Kirkenes"],
+  norge:["Ålesund","Molde","Kristiansund","Kristiansand","Arendal","Førde","Sogndal","Norge"],
+  reykjavik:["Reykjavík","Reykjavik","Keflavík","Keflavik","Hafnarfjörður","Kópavogur","Garðabær","Mosfellsbær","Reykjanesbær","Grindavík","Þingvellir","Thingvellir","Bláa lónið","Blue Lagoon"],
+  akureyri:["Akureyri","Hlíðarfjall","Húsavík","Dalvík","Siglufjörður","Mývatn","Myvatn"],
+  island:["Island","Iceland","Vestmannaeyjar","Heimaey","Selfoss","Vík","Höfn","Egilsstaðir","Ísafjörður","Borgarnes","Jökulsárlón","Landeyjahöfn","Snæfellsnes","Gullfoss","Geysir","Ringveien"],
+  barcelona:["Barcelona","El Prat","Sants","Gràcia","Eixample","Sant Antoni","Poble-sec","Badalona","Hospitalet","Mataró","Terrassa","Sabadell","Sitges","Montserrat"],
+  girona:["Girona","Figueres","Cadaqués","Palafrugell","Roses","Blanes","Lloret","Begur","Olot","Costa Brava"],
+  tarragona:["Tarragona","Reus","Salou","Cambrils","Tortosa","Camp de Tarragona","Costa Daurada"],
+  pirineus:["Lleida","La Molina","Núria","Puigcerdà","Vielha","Seu d'Urgell","Andorra","Pyreneene","Pirineus"],
+  madrid:["Madrid","Barajas","Atocha","Chamartín","Alcalá","Toledo","Segovia"],
+  valencia:["València","Valencia","Manises","Alicante","Castelló"],
+  spania:["Sevilla","Málaga","Bilbao","Zaragoza","Granada","Córdoba","Mallorca","Palma","San Sebastián","Spania"],
+  europa:["København","Copenhagen","Stockholm","Göteborg","Berlin","Hamburg","Amsterdam","Paris","London","Praha","Wien","Milano","Roma","Lisboa","Porto","Dublin","Brussel","München","Zürich","Helsinki","Tallinn","Warszawa","Budapest"]
+};
+
+const FOLD = {"ø":"o","æ":"ae","ð":"d","þ":"th","ı":"i","ł":"l","đ":"d"};
+function norm(t){
+  return String(t).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"")
+    .replace(/[øæðþıłđ]/g,function(c){return FOLD[c]||c;})
+    .replace(/[^a-z0-9\s]/g," ").replace(/\s+/g," ").trim();
+}
+const GAZ_INDEX = [];
+Object.keys(GAZ).forEach(function(area){
+  GAZ[area].forEach(function(name){ GAZ_INDEX.push({name:name, n:norm(name), area:area}); });
+});
+
+/* Adresser skrives «Storgata 5, Moss» — vi prøver hele strengen, så
+   hvert komma-ledd, så hvert ord, og lar det lengste treffet vinne. */
+function matchText(q){
+  const whole = norm(q);
+  if(!whole) return null;
+  const segs = [whole].concat(whole.split(/\s*,\s*/), whole.split(" "));
+  let best = null;
+  GAZ_INDEX.forEach(function(e){
+    segs.forEach(function(seg){
+      if(!seg) return;
+      let sc = 0;
+      if(seg === e.n) sc = 300;
+      else if(seg.indexOf(e.n) === 0 || e.n.indexOf(seg) === 0) sc = 200;
+      else if(seg.indexOf(e.n) > -1) sc = 100;
+      if(!sc) return;
+      sc += e.n.length;
+      if(!best || sc > best.sc) best = {sc:sc, e:e};
+    });
+  });
+  return best ? best.e : null;
+}
+function suggest(q){
+  const t = norm(q);
+  if(t.length < 2) return [];
+  const hits = GAZ_INDEX.filter(function(e){ return e.n.indexOf(t) > -1; });
+  hits.sort(function(a,b){
+    const ai = a.n.indexOf(t), bi = b.n.indexOf(t);
+    return ai - bi || a.n.length - b.n.length;
+  });
+  return hits.slice(0,6);
+}
+
+/* Koordinater direkte, eller hentet ut av en Google Maps-lenke. */
+function parseCoords(q){
+  const t = String(q).trim();
+  let m = t.match(/^(-?\d{1,3}(?:[.,]\d+)?)\s*[,;\s]\s*(-?\d{1,3}(?:[.,]\d+)?)$/);
+  if(m) return mk(m[1], m[2]);
+  m = t.match(/!3d(-?\d+(?:\.\d+)?)!4d(-?\d+(?:\.\d+)?)/);            // stedsnål
+  if(m) return mk(m[1], m[2]);
+  m = t.match(/[?&](?:q|query|daddr|destination|saddr|origin|ll|center)=(-?\d+(?:\.\d+)?)\s*,\s*(-?\d+(?:\.\d+)?)/);
+  if(m) return mk(m[1], m[2]);
+  m = t.match(/@(-?\d+(?:\.\d+)?),(-?\d+(?:\.\d+)?)/);                 // kartsenter
+  if(m) return mk(m[1], m[2]);
+  return null;
+  function mk(a,b){
+    const lat = parseFloat(String(a).replace(",",".")), lon = parseFloat(String(b).replace(",","."));
+    if(!isFinite(lat) || !isFinite(lon) || Math.abs(lat) > 90 || Math.abs(lon) > 180) return null;
+    return {lat:lat, lon:lon};
+  }
+}
+/* Stedsnavnet Google legger i /place/…/ er ofte nok alene. */
+function placeFromUrl(q){
+  const m = String(q).match(/\/place\/([^/@?]+)/);
+  if(!m) return "";
+  try { return decodeURIComponent(m[1].replace(/\+/g," ")); } catch(e){ return m[1].replace(/\+/g," "); }
+}
+function isShortLink(q){ return /(maps\.app\.goo\.gl|goo\.gl\/maps)/i.test(String(q)); }
+
+function nearestArea(lat,lon){
+  let best = null;
+  Object.keys(AREA_LL).forEach(function(id){
+    if(NO_SNAP[id]) return;
+    const c = AREA_LL[id];
+    const dLat = (c[0]-lat) * 111.2;
+    const dLon = (c[1]-lon) * 111.2 * Math.cos((lat+c[0])/2 * Math.PI/180);
+    const km = Math.sqrt(dLat*dLat + dLon*dLon);
+    if(!best || km < best.km) best = {area:id, km:km};
+  });
+  return best;
+}
+
+/* Ett svar: hvilket område, og en linje som sier hvordan vi kom dit. */
+function resolveText(q){
+  if(isShortLink(q)) return {err:"Kortlenker fra Maps kan ikke slås opp uten nett. Åpne lenken i Maps og kopier adressefeltet, eller skriv stedsnavnet."};
+  const c = parseCoords(q);
+  if(c){
+    const near = nearestArea(c.lat, c.lon);
+    return {area:near.area, ll:[c.lat,c.lon],
+      note:"Punkt "+c.lat.toFixed(3)+", "+c.lon.toFixed(3)+" → nærmeste område <b>"+AREAS[near.area].n+"</b>, "+Math.round(near.km)+" km unna."};
+  }
+  const viaUrl = placeFromUrl(q);
+  const hit = matchText(q) || (viaUrl ? matchText(viaUrl) : null);
+  if(hit) return {area:hit.area, note:"Matchet på <b>"+esc(hit.name)+"</b> → "+esc(AREAS[hit.area].n)+"."};
+  return {miss:true, hint:viaUrl};
+}
+</script>
+<script>
 /* --------------------------------------------------------------- */
 const FLIGHT = new Set(["norwegian","sas","wideroe","vueling","ryanair","icelandair","playair"]);
 const BAND = ["","€","€€","€€€","€€€€"];
 const PRI_LABEL = {cheap:"billigst",balanced:"balansert",fast:"raskest"};
 const BAG_LABEL = {hand:"håndbagasje",hold:"koffert",gear:"utstyr og instrumenter"};
 
-const state = {from:"moss", to:"oslo", pri:"cheap", bag:"hold"};
+const state = {from:"moss", to:"oslo", pri:"cheap", bag:"hold",
+  raw:{from:"",to:""}, ll:{from:null,to:null}, note:{from:"",to:""}};
 
 const esc = s => String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 
@@ -1000,10 +1177,26 @@ function renderStages(list){
   ).join("") + '</div>';
 }
 
+function mapsPoint(side){
+  if(state.ll[side]) return state.ll[side][0].toFixed(5)+","+state.ll[side][1].toFixed(5);
+  const raw = (state.raw[side]||"").trim();
+  if(raw && !/^https?:/i.test(raw)) return raw;
+  return AREAS[state[side]].n.replace(/^Resten av /,"").replace(/\s*[&(].*$/,"").trim();
+}
+function mapsLink(){
+  if(state.from===state.to) return "";
+  return "https://www.google.com/maps/dir/?api=1&travelmode=transit"
+    + "&origin=" + encodeURIComponent(mapsPoint("from"))
+    + "&destination=" + encodeURIComponent(mapsPoint("to"));
+}
+
 function render(){
   const from = AREAS[state.from], to = AREAS[state.to];
+  const ml = mapsLink();
   const head = '<div class="route-head"><h2>'+esc(from.n)+(state.from===state.to?"":" → "+esc(to.n))+'</h2>'
-    + '<span class="meta">prioritet: '+PRI_LABEL[state.pri]+' · bagasje: '+BAG_LABEL[state.bag]+'</span></div>';
+    + '<span class="meta">prioritet: '+PRI_LABEL[state.pri]+' · bagasje: '+BAG_LABEL[state.bag]+'</span>'
+    + (ml ? '<a class="maplink" href="'+ml+'" target="_blank" rel="noopener">Åpne ruten i Google Maps ↗</a>' : "")
+    + '</div>';
   const optList = function(arr){
     const ex = extremes(arr);
     return '<div class="opts">'+rank(arr,state.pri).map(function(o,i){return optCard(o,i===0,ex);}).join("")+'</div>';
@@ -1061,11 +1254,8 @@ function buildSelects(){
   ).join("");
   const f=document.getElementById("from"), t=document.getElementById("to");
   f.innerHTML=html; t.innerHTML=html; f.value=state.from; t.value=state.to;
-  f.addEventListener("change",()=>{state.from=f.value;render();});
-  t.addEventListener("change",()=>{state.to=t.value;render();});
-  document.getElementById("swap").addEventListener("click",()=>{
-    [state.from,state.to]=[state.to,state.from]; f.value=state.from; t.value=state.to; render();
-  });
+  /* Lytterne ligger i wireLocation(), som holder tekstfelt, select og
+     kart-lenke i takt. To sett ville doblet bytt-retning til et nullpunkt. */
 }
 function buildSeg(id,key){
   const el=document.getElementById(id);
@@ -1075,6 +1265,177 @@ function buildSeg(id,key){
     state[key]=b.dataset.v; sync(); render();
   });
   sync();
+}
+
+
+/* ---- stedsfelt, posisjon og Claude-oppslag ---- */
+var SAMPLE = null;
+(function(){
+  try {
+    if(window.claude && typeof claude.use === "function"){
+      claude.use("sample").then(function(fn){
+        SAMPLE = fn || null;
+        /* Setningen om Claude-oppslag settes bare når kapabiliteten
+           faktisk svarer, så siden aldri lover noe den ikke kan. */
+        const n = document.getElementById("samplenote");
+        if(SAMPLE && n) n.textContent = " Kjenner listen ikke adressen, kan den spørre Claude.";
+      }, function(){ SAMPLE = null; });
+    }
+  } catch(e){ SAMPLE = null; }
+})();
+
+const SAMPLE_COPY = {
+  not_granted:"Oppslag med Claude ble ikke tillatt i denne visningen.",
+  sampling_disabled:"Oppslag med Claude er slått av her.",
+  not_declared:"Oppslag med Claude er ikke tilgjengelig her.",
+  capability_disabled:"Oppslag med Claude er ikke tilgjengelig her.",
+  capability_removed:"Oppslag med Claude er ikke tilgjengelig her.",
+  rate_limited:"For mange oppslag akkurat nå. Vent litt og prøv igjen.",
+  invalid_json:"Fikk ikke et brukbart svar. Prøv et stedsnavn i stedet.",
+  empty_completion:"Fikk ikke noe svar. Prøv et stedsnavn i stedet.",
+  refused:"Oppslaget ble avvist. Prøv et stedsnavn i stedet.",
+  prompt_too_large:"Adressen var for lang.",
+  session_expired:"Økten er utløpt. Last siden på nytt."
+};
+
+function setSide(side, area, note, raw, ll){
+  state[side] = area;
+  state.raw[side] = raw || "";
+  state.ll[side] = ll || null;
+  state.note[side] = note || "";
+  const sel = document.getElementById(side);
+  if(sel) sel.value = area;
+  const res = document.getElementById(side+"res");
+  if(res){ res.className = "res"; res.innerHTML = note || ""; }
+  render();
+}
+
+function wireLocation(){
+  ["from","to"].forEach(function(side){
+    const input = document.getElementById(side+"q");
+    const list  = document.getElementById(side+"sugg");
+    const res   = document.getElementById(side+"res");
+    const sel   = document.getElementById(side);
+    let items = [], cur = -1;
+
+    input.value = AREAS[state[side]].n;
+
+    function closeList(){ list.hidden = true; list.innerHTML = ""; items = []; cur = -1; }
+    function openList(hits){
+      items = hits; cur = -1;
+      list.innerHTML = hits.map(function(h){
+        return '<li role="option"><span>'+esc(h.name)+'</span><em>'+esc(AREAS[h.area].n)+'</em></li>';
+      }).join("");
+      list.hidden = !hits.length;
+    }
+    function pick(h){
+      input.value = h.name;
+      closeList();
+      setSide(h.area, "Matchet på <b>"+esc(h.name)+"</b> → "+esc(AREAS[h.area].n)+".", h.name, null);
+    }
+
+    function commit(){
+      const q = input.value.trim();
+      closeList();
+      if(!q){ res.className="res"; res.innerHTML=""; return; }
+      const r = resolveText(q);
+      if(r.err){ res.className = "res warn"; res.innerHTML = esc(r.err); return; }
+      if(r.area){ setSide(r.area, r.note, q, r.ll); return; }
+      res.className = "res warn";
+      res.innerHTML = "Fant ikke «"+esc(q)+"» i stedslisten."
+        + (SAMPLE ? ' <button type="button" class="ask">Slå opp med Claude</button>' : " Prøv et større stedsnavn i nærheten.");
+      const btn = res.querySelector(".ask");
+      if(btn) btn.addEventListener("click", function(){ askClaude(side, q, res, btn); });
+    }
+
+    input.addEventListener("input", function(){
+      if(/^https?:/i.test(input.value) || parseCoords(input.value)){ closeList(); return; }
+      openList(suggest(input.value));
+    });
+    input.addEventListener("keydown", function(e){
+      if(list.hidden){ if(e.key === "Enter"){ e.preventDefault(); commit(); } return; }
+      if(e.key === "ArrowDown" || e.key === "ArrowUp"){
+        e.preventDefault();
+        cur = e.key === "ArrowDown" ? (cur + 1) % items.length
+                                    : (cur <= 0 ? items.length - 1 : cur - 1);
+        [].forEach.call(list.children, function(li,i){ li.classList.toggle("on", i === cur); });
+      } else if(e.key === "Enter"){
+        e.preventDefault();
+        if(cur > -1 && items[cur]) pick(items[cur]); else commit();
+      } else if(e.key === "Escape"){ closeList(); }
+    });
+    input.addEventListener("blur", function(){ setTimeout(function(){ if(!list.hidden) closeList(); }, 160); });
+    list.addEventListener("mousedown", function(e){
+      const li = e.target.closest("li"); if(!li) return;
+      e.preventDefault();
+      pick(items[[].indexOf.call(list.children, li)]);
+    });
+    sel.addEventListener("change", function(){
+      input.value = AREAS[sel.value].n;
+      setSide(sel.value, "Valgt fra områdelisten.", "", null);
+    });
+  });
+
+  document.getElementById("swap").addEventListener("click", function(){
+    const a = state.from, ar = state.raw.from, al = state.ll.from, an = state.note.from;
+    setSide("from", state.to, state.note.to, state.raw.to, state.ll.to);
+    setSide("to", a, an, ar, al);
+    document.getElementById("fromq").value = state.raw.from || AREAS[state.from].n;
+    document.getElementById("toq").value   = state.raw.to   || AREAS[state.to].n;
+  });
+
+  const geo = document.getElementById("geobtn");
+  geo.addEventListener("click", function(){
+    const res = document.getElementById("fromres");
+    if(!navigator.geolocation){
+      res.className = "res warn";
+      res.innerHTML = "Nettleseren gir ikke posisjon her. Lim inn en Google Maps-lenke i stedet.";
+      return;
+    }
+    geo.disabled = true;
+    res.className = "res"; res.innerHTML = "Henter posisjon …";
+    navigator.geolocation.getCurrentPosition(function(pos){
+      geo.disabled = false;
+      const lat = pos.coords.latitude, lon = pos.coords.longitude;
+      const near = nearestArea(lat, lon);
+      document.getElementById("fromq").value = lat.toFixed(5)+", "+lon.toFixed(5);
+      setSide("from", near.area,
+        "Din posisjon → nærmeste område <b>"+esc(AREAS[near.area].n)+"</b>, "+Math.round(near.km)+" km unna.",
+        "", [lat,lon]);
+    }, function(err){
+      geo.disabled = false;
+      res.className = "res warn";
+      res.innerHTML = err && err.code === 1
+        ? "Posisjon ble avslått. Siden kjører i en ramme som ofte blokkerer det — lim inn en Google Maps-lenke i stedet."
+        : "Fikk ikke tak i posisjonen. Lim inn en Google Maps-lenke eller skriv stedsnavnet.";
+    }, {timeout:9000, maximumAge:60000});
+  });
+}
+
+function askClaude(side, q, res, btn){
+  if(!SAMPLE) return;
+  btn.disabled = true;
+  res.className = "res";
+  res.innerHTML = "Spør Claude om hvor «"+esc(q)+"» ligger …";
+  const omrader = Object.keys(AREAS).map(function(id){ return id+" = "+AREAS[id].n; }).join("\n");
+  const prompt = "Du plasserer en adresse i riktig område for en reiseplanlegger.\n\nOmråder:\n"
+    + omrader + "\n\nBrukerens adresse eller sted: " + q
+    + "\n\nSvar med kun JSON på formen {\"area\":\"<id fra lista, eller null>\",\"sted\":\"<kort stedsnavn>\"}."
+    + " Velg området som geografisk dekker adressen. Kjenner du ikke stedet, sett area til null.";
+  SAMPLE.json(prompt, {modelTier:"quick"}).then(function(r){
+    if(r && r.area && AREAS[r.area]){
+      const sted = r.sted ? String(r.sted).slice(0,60) : q;
+      setSide(side, "Claude plasserte <b>"+esc(sted)+"</b> i "+esc(AREAS[r.area].n)+".", q, null);
+    } else {
+      res.className = "res warn";
+      res.innerHTML = "Claude kjente ikke igjen stedet. Prøv et større stedsnavn i nærheten.";
+    }
+  }, function(e){
+    if(e && e.code === "cancelled") return;
+    res.className = "res warn";
+    res.innerHTML = esc((e && SAMPLE_COPY[e.code]) || "Oppslaget feilet. Prøv et stedsnavn i stedet.");
+    if(e && /not_granted|sampling_disabled|not_declared|capability_/.test(e.code)) SAMPLE = null;
+  });
 }
 
 /* ---- oppslagstabell ---- */
@@ -1167,7 +1528,7 @@ function buildTraps(){
   ).join("");
 }
 
-buildSelects(); buildSeg("pri","pri"); buildSeg("bag","bag"); buildBill(); buildRef(); buildCal(); buildTraps(); render();
+buildSelects(); wireLocation(); buildSeg("pri","pri"); buildSeg("bag","bag"); buildBill(); buildRef(); buildCal(); buildTraps(); render();
 </script>
 
 </body>
