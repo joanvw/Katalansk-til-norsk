@@ -212,9 +212,9 @@ footer p{margin:0 0 6px;max-width:70ch}
 
 <header class="masthead">
   <div class="wrap">
-    <p class="eyebrow">Reiseplanlegger · Norge ↔ Catalonia ↔ Europa</p>
+    <p class="eyebrow">Pendlerområdene rundt Oslo · og videre ut i Europa</p>
     <h1>Rett app, rett rute</h1>
-    <p class="lede">Velg hvor du reiser fra og til. Siden setter opp reisen etappe for etappe og forteller hvilken app du faktisk trenger i hvert ledd — og hva som skiller den billigste veien fra den raskeste.</p>
+    <p class="lede">Nesodden, Moss, Horten, Hadeland, Eidsvoll og Kongsberg ligger i fem forskjellige billettsystemer. Velg hvor du reiser fra og til, så setter siden opp reisen etappe for etappe og forteller hvilken app som gjelder i hvert ledd — og hva som skiller den billigste veien fra den raskeste.</p>
   </div>
 </header>
 
@@ -252,6 +252,20 @@ footer p{margin:0 0 6px;max-width:70ch}
 
     <section id="result" aria-live="polite"></section>
   </div>
+
+  <section class="ref">
+    <h2>Hvem selger billetten hvor</h2>
+    <p class="intro">Fem fylkeskommunale billettører dekker hvert sitt område, Vy selger togbillettene på tvers av dem, og Entur samler alt i én app. Fylkesbilletten stopper på fylkesgrensa — toget gjør ikke det.</p>
+    <div class="tablewrap">
+      <table>
+        <thead>
+          <tr><th>Område</th><th>Billettør</th><th>App</th><th>Toget inn til Oslo</th></tr>
+        </thead>
+        <tbody id="billtable"></tbody>
+      </table>
+    </div>
+    <p class="intro" style="margin-top:18px">Entur er den nasjonale plattformen som ligger under alle sammen. Skal reisen krysse en fylkesgrense — og det gjør den nesten alltid herfra — er Entur stedet der du både finner og kjøper hele reisen i én operasjon.</p>
+  </section>
 
   <section class="ref">
     <h2>Områdene og appene som dekker dem</h2>
@@ -299,6 +313,13 @@ const APPS = {
   sas:       ["SAS","https://flysas.com","innenlands + Europa"],
   wideroe:   ["Widerøe","https://wideroe.no","kortbanenettet"],
   hurtigruten:["Hurtigruten / Havila","https://havilavoyages.com","kystruta Bergen–Kirkenes"],
+  okt:       ["ØstfoldBillett","https://ostfoldkollektivtrafikk.no","buss i Østfold (ØKT)"],
+  vkt:       ["VKT","https://vkt.no","buss i Vestfold"],
+  innlandstrafikk:["Innlandstrafikk","https://innlandstrafikk.no","buss i Innlandet"],
+  brakar:    ["Brakar","https://brakar.no","buss i Buskerud"],
+  sj:        ["SJ Norge","https://sj.no","Dovrebanen og nordover"],
+  goahead:   ["Go-Ahead Nordic","https://go-aheadnordic.no","Sørlandsbanen og Jærbanen"],
+  basto:     ["Bastø Fosen","https://bastofosen.no","ferja Moss – Horten"],
 
   tmb:       ["TMB App","https://tmb.cat","metro og buss i Barcelona"],
   tmob:      ["T-mobilitat","https://tmobilitat.cat","T-casual og T-usual"],
@@ -337,7 +358,7 @@ const AREAS = {
     local:["ruter","entur","boltno","bysykkel","ryde"],
     localNote:"Ruter dekker buss, trikk, T-bane, båt og lokaltog i hele Oslo og Akershus på én billett. Entur er søket når reisen fortsetter ut av Ruter-området.",
     air:[
-      {n:"Vy lokaltog R11 / R13 fra Oslo S",t:"23 min",mins:23,pr:2,apps:["vy","entur"],why:"Går fire ganger i timen og koster rundt halvparten av Flytoget for tre minutter mer.",cheap:1},
+      {n:"Vy lokaltog fra Oslo S",t:"23 min",mins:23,pr:2,apps:["vy","entur"],why:"Går fire ganger i timen og koster rundt halvparten av Flytoget for tre minutter mer.",cheap:1},
       {n:"Flytoget",t:"20 min",mins:20,pr:3,apps:["flytoget"],why:"Hvert 10. minutt, brede bagasjehyller, egen avgangsplattform på Oslo S.",fast:1},
       {n:"Bolt eller taxi",t:"40–55 min",mins:48,pr:4,apps:["boltno"],why:"Bare verdt det om du er flere som deler, eller reiser før første tog.",gear:1}
     ]},
@@ -374,6 +395,49 @@ const AREAS = {
     localNote:"Entur er felles for alle fylkesselskapene og viser buss, tog, ferje og hurtigbåt. Selve billetten må av og til kjøpes i fylkets egen app — Entur sier hvilken.",
     air:[
       {n:"Fylkesbuss eller lokaltog",t:"varierer",mins:60,pr:1,apps:["entur"],why:"Søk fra adresse til flyplass i Entur; den setter sammen buss, båt og tog for deg.",cheap:1,fast:1}
+    ]},
+
+  nesodden:{ n:"Nesodden", g:"Pendlerområder rundt Oslo", c:"no", hub:"OSL Gardermoen", rail:"Nesoddtangen kai",
+    local:["ruter","entur","boltno"],
+    localNote:"Nesodden er en del av Ruter-området. Båten fra Nesoddtangen er kollektivtrafikk på linje med T-banen — samme app, samme billett, to soner inn til Oslo.",
+    air:[
+      {n:"Nesoddbåten + Vy lokaltog fra Oslo S",t:"1 t 10 min",mins:70,pr:2,apps:["ruter","vy","entur"],why:"Båt til Aker brygge, trikk eller buss til Oslo S, lokaltog videre. Alt bortsett fra togbilletten ligger i Ruter.",cheap:1},
+      {n:"Nesoddbåten + Flytoget",t:"1 t 05 min",mins:65,pr:3,apps:["ruter","flytoget"],why:"Samme båt, dyrere siste etappe. Verdt det når båten er forsinket og marginen er tynn.",fast:1},
+      {n:"Bil eller taxi rundt fjorden",t:"55 min",mins:55,pr:4,apps:["boltno"],why:"Landeveien om Vinterbro er faktisk kortest i tid — men bare med bil.",gear:1}
+    ]},
+  moss:{ n:"Moss", g:"Pendlerområder rundt Oslo", c:"no", hub:"OSL Gardermoen", rail:"Moss stasjon",
+    local:["okt","vy","entur","boltno"],
+    localNote:"Østfold kollektivtrafikk kjører bussene, og billetten kjøper du i ØstfoldBillett. Toget inn til Oslo ligger utenfor det systemet — der er det Vy eller Entur.",
+    air:[
+      {n:"Vy til Oslo S, bytt til lokaltog",t:"1 t 20 min",mins:80,pr:2,apps:["vy","entur"],why:"Ett bytte på Oslo S. Sjekk i Entur om avgangen din går gjennomgående — noen gjør det.",cheap:1},
+      {n:"Vy til Oslo S + Flytoget",t:"1 t 15 min",mins:75,pr:3,apps:["vy","flytoget"],why:"Kjøper deg fem minutter og en garantert plass til bagasjen.",fast:1,gear:1}
+    ]},
+  horten:{ n:"Horten", g:"Pendlerområder rundt Oslo", c:"no", hub:"TRF Torp eller OSL", rail:"Skoppum stasjon",
+    local:["vkt","vy","entur","basto"],
+    localNote:"VKT dekker bussene i Vestfold. Merk at Horten ikke har egen jernbanestasjon: Vestfoldbanen stopper på Skoppum, og VKT-bussen tar deg dit.",
+    air:[
+      {n:"VKT-buss til Skoppum, Vy via Oslo S",t:"2 t",mins:120,pr:2,apps:["vkt","vy","entur"],why:"Den kollektive veien til Gardermoen går hele veien gjennom Oslo.",cheap:1},
+      {n:"Sandefjord lufthavn Torp i stedet",t:"40 min",mins:40,pr:3,apps:["vkt","entur","boltno"],why:"Torp ligger 40 minutter sør for Horten. Sjekk om ruta di går derfra før du bruker to timer på Gardermoen.",fast:1,gear:1}
+    ]},
+  hadeland:{ n:"Hadeland (Gran og Lunner)", g:"Pendlerområder rundt Oslo", c:"no", hub:"OSL Gardermoen", rail:"Gran eller Jaren stasjon",
+    local:["innlandstrafikk","vy","entur","brakar"],
+    localNote:"Innlandstrafikk dekker Gran og Lunner. Jevnaker hører geografisk til Hadeland, men ligger i Buskerud og dekkes av Brakar — samme dalføre, to billettsystemer.",
+    air:[
+      {n:"Gjøvikbanen til Oslo S, lokaltog videre",t:"1 t 50 min",mins:110,pr:2,apps:["vy","entur"],why:"Rutetabellen sender deg sørover til Oslo før du kan snu nordøstover igjen.",cheap:1},
+      {n:"Bil eller taxi over Hurdal",t:"55 min",mins:55,pr:4,apps:["boltno"],why:"Hadeland ligger nærmere Gardermoen i luftlinje enn i rutetabellen. Med bil halveres tiden.",fast:1,gear:1}
+    ]},
+  eidsvoll:{ n:"Eidsvoll", g:"Pendlerområder rundt Oslo", c:"no", hub:"OSL Gardermoen", rail:"Eidsvoll stasjon",
+    local:["ruter","vy","entur"],
+    localNote:"Eidsvoll ligger i Akershus, altså innenfor Ruter. Det betyr at Ruter-billetten din også gjelder på Vy-toget så lenge du holder deg innenfor sonene.",
+    air:[
+      {n:"Vy lokaltog sørover",t:"12 min",mins:12,pr:1,apps:["vy","ruter","entur"],why:"Oslo lufthavn er nabostasjonen. Ingen andre områder på denne lista har det så kort.",cheap:1,fast:1,gear:1}
+    ]},
+  kongsberg:{ n:"Kongsberg", g:"Pendlerområder rundt Oslo", c:"no", hub:"OSL Gardermoen", rail:"Kongsberg stasjon",
+    local:["brakar","vy","entur","goahead"],
+    localNote:"Brakar er billettøren i Buskerud. Toget over Sørlandsbanen kjøper du hos Vy eller i Entur — Brakar-billetten stopper på fylkesgrensa.",
+    air:[
+      {n:"Vy lokaltog gjennom Oslo",t:"2 t",mins:120,pr:2,apps:["vy","entur"],why:"Samme togline går fra Kongsberg via Drammen og Oslo helt fram til flyplassen. Ingen bytter.",cheap:1,fast:1,gear:1},
+      {n:"Torp i stedet, via Drammen",t:"1 t 15 min",mins:75,pr:3,apps:["brakar","entur","boltno"],why:"Sandefjord lufthavn er nærmere enn Gardermoen om ruta di finnes der.",}
     ]},
 
   barcelona:{ n:"Barcelona & storbyområdet", g:"Catalonia", c:"es", hub:"BCN El Prat", rail:"Barcelona Sants",
@@ -439,6 +503,40 @@ const AREAS = {
 const O = (n,t,mins,pr,apps,why,flags) => Object.assign({n,t,mins,pr,apps,why},flags||{});
 
 const CORRIDORS = {
+  "nesodden|oslo":{book:["ruter","entur"],opts:[
+    O("Nesoddbåten til Aker brygge","22 min",22,1,["ruter"],"Går hvert kvarter i rushtiden og er en del av Ruter-nettet — samme billett som buss og T-bane, to soner.",{cheap:1,fast:1,gear:1}),
+    O("Buss rundt fjorden via Vinterbro","1 t 15 min",75,1,["ruter","entur"],"Landeveien. Reservealternativet når båten står i is eller storm.",{})
+  ]},
+  "moss|oslo":{book:["entur","vy"],opts:[
+    O("Vy over Østfoldbanen","38 min",38,2,["vy","entur"],"Den reelle pendlerruta. Månedsbillett hos Vy, eller hele reisen i Entur.",{fast:1,gear:1}),
+    O("Buss nordover med ØstfoldBillett, så Ruter","1 t 25 min",85,1,["okt","ruter","entur"],"Billigst, men du krysser fylkesgrensa midt i reisen og må ha billett i to systemer.",{cheap:1})
+  ]},
+  "horten|oslo":{book:["entur","vy","vkt"],opts:[
+    O("VKT-buss til Skoppum, Vy over Vestfoldbanen","1 t 20 min",80,2,["vkt","vy","entur"],"Horten har ingen egen stasjon — Skoppum er togstoppet, og bussen dit må korrespondere.",{fast:1,gear:1}),
+    O("Bastø Fosen til Moss, Vy over Østfoldbanen","1 t 45 min",105,2,["basto","vy","entur"],"Over fjorden i stedet for rundt. Kan slå Vestfoldbanen når toget har innstillinger.",{}),
+    O("Ekspressbuss langs E18","1 t 50 min",110,1,["entur","vy"],"Billigst inn til Oslo bussterminal, men følsom for kø på Drammensveien.",{cheap:1})
+  ]},
+  "hadeland|oslo":{book:["entur","vy"],opts:[
+    O("Gjøvikbanen med Vy fra Gran eller Jaren","1 t 10 min",70,2,["vy","entur"],"Én time rett inn til Oslo S uten bytter. Færre avganger enn på de andre banene, så rutetabellen styrer dagen.",{fast:1,gear:1}),
+    O("Innlandstrafikk-buss sørover til Ruter-området","1 t 45 min",105,1,["innlandstrafikk","ruter","entur"],"Bussene langs rv. 4 krysser fylkesgrensa, og da bytter du billettsystem midt i reisen.",{cheap:1})
+  ]},
+  "eidsvoll|oslo":{book:["ruter","entur","vy"],opts:[
+    O("Vy lokaltog via Oslo lufthavn","40 min",40,1,["vy","ruter","entur"],"Eidsvoll ligger innenfor Ruters soner, så Ruter-billetten gjelder på toget. Kjøper du Vy-billett i tillegg, betaler du to ganger.",{cheap:1,fast:1,gear:1}),
+    O("Ruter-buss via Jessheim og Lillestrøm","1 t 20 min",80,1,["ruter","entur"],"Samme billett som toget, dobbelt så lang tid. Aktuelt ved sporarbeid.",{})
+  ]},
+  "kongsberg|oslo":{book:["entur","vy"],opts:[
+    O("Vy lokaltog via Drammen","1 t 20 min",80,2,["vy","entur"],"Går hele veien inn til Oslo S og videre mot Gardermoen på samme linje.",{cheap:1,gear:1}),
+    O("Go-Ahead sitt regiontog","1 t 15 min",75,2,["goahead","entur"],"Go-Ahead kjører de gjennomgående togene på Sørlandsbanen. Billetten ligger i Entur.",{fast:1}),
+    O("Brakar-buss til Drammen, tog videre","1 t 50 min",110,1,["brakar","vy","entur"],"Brakar dekker bussen fram til Drammen; derfra er det Vy.",{})
+  ]},
+  "horten|moss":{book:["basto","entur"],opts:[
+    O("Bastø Fosen over fjorden","30 min",30,2,["basto"],"Ferja går store deler av døgnet og kutter to timer mot å reise rundt Oslofjorden.",{cheap:1,fast:1,gear:1}),
+    O("Tog via Drammen og Oslo","2 t 30 min",150,3,["vy","entur"],"Hele veien rundt fjorden, gjennom to fylker og Oslo. Bare aktuelt når ferja ligger.",{})
+  ]},
+  "eidsvoll|kongsberg":{book:["entur","vy"],opts:[
+    O("Vy lokaltog rett gjennom Oslo","2 t",120,2,["vy","entur"],"Samme linje hele veien via Oslo lufthavn, Oslo S og Drammen — ingen bytter. Men billetten krysser tre fylker, så kjøp den i Entur eller Vy, ikke i Ruter.",{cheap:1,fast:1,gear:1})
+  ]},
+
   "bergen|oslo":{book:["entur","vy","skyscanner"],opts:[
     O("Bergensbanen med Vy","6 t 50 min",410,2,["vy","entur"],"Minipris fra 299 kr hvis du bokser tidlig, og du slipper hele flyplasslogistikken i begge ender.",{cheap:1,gear:1}),
     O("Fly Norwegian eller SAS","55 min",55,3,["norwegian","sas","skyscanner"],"Selve flyturen er kort, men regn 3–4 timer dør til dør med Flesland og Gardermoen.",{fast:1}),
@@ -492,7 +590,7 @@ const CORRIDORS = {
 
 const FALLBACKS = {
   "no|no":{book:["entur","skyscanner","vy"],opts:[
-    O("Tog og buss via Entur","varierer",300,1,["entur","vy","norway"],"Entur setter sammen tog, buss, ferje og hurtigbåt i én reise og viser totalprisen.",{cheap:1,gear:1}),
+    O("Tog og buss via Entur","varierer",300,1,["entur","vy","sj","goahead","norway"],"Entur setter sammen tog, buss, ferje og hurtigbåt i én reise og viser totalprisen — også når SJ eller Go-Ahead kjører strekningen i stedet for Vy.",{cheap:1,gear:1}),
     O("Innenriksfly","1–2 t",90,3,["norwegian","sas","wideroe","skyscanner"],"Widerøe dekker kortbanenettet der de store ikke går.",{fast:1})
   ]},
   "es|es":{book:["renfe","omio","rome2rio"],opts:[
@@ -529,7 +627,7 @@ const BAND = ["","€","€€","€€€","€€€€"];
 const PRI_LABEL = {cheap:"billigst",balanced:"balansert",fast:"raskest"};
 const BAG_LABEL = {hand:"håndbagasje",hold:"koffert",gear:"utstyr og instrumenter"};
 
-const state = {from:"oslo", to:"barcelona", pri:"cheap", bag:"hold"};
+const state = {from:"moss", to:"oslo", pri:"cheap", bag:"hold"};
 
 const esc = s => String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 
@@ -660,6 +758,12 @@ function buildSeg(id,key){
 
 /* ---- oppslagstabell ---- */
 const REF_OUT = {
+  nesodden:"Nesoddbåten inn til Aker brygge; alt videre går fra Oslo",
+  moss:"Østfoldbanen nordover mot Oslo og sørover mot Halden, Bastø Fosen vestover til Horten",
+  horten:"Vestfoldbanen fra Skoppum, Bastø Fosen østover til Moss, E18-buss mot Oslo",
+  hadeland:"Gjøvikbanen sørover til Oslo og nordover til Gjøvik, Innlandstrafikk-buss i dalføret",
+  eidsvoll:"Lokaltog til Oslo lufthavn på tolv minutter, videre sørover gjennom Oslo til Drammen og Kongsberg",
+  kongsberg:"Sørlandsbanen mot Oslo og videre sørvestover med Go-Ahead, Brakar-buss til Drammen",
   oslo:"Vy og Entur til hele Sør-Norge, NOR-WAY ekspressbuss, direktefly til det meste av Europa",
   bergen:"Bergensbanen, Kystbussen til Stavanger, direktefly til nordiske hovedsteder",
   stavanger:"Sørlandsbanen, Kystbussen, tett flytilbud til Oslo og Nordsjøen",
@@ -684,8 +788,31 @@ function buildRef(){
   ).join("");
 }
 
+
+/* ---- billettørene ---- */
+const BILL = [
+  ["Nesodden","Ruter","Ruter","Ruter-billetten gjelder også på toget — Nesodden ligger i sonene"],
+  ["Moss","Østfold kollektivtrafikk (ØKT)","ØstfoldBillett","Vy over Østfoldbanen, utenfor ØKT-billetten"],
+  ["Horten","Vestfold kollektivtrafikk","VKT","Vy over Vestfoldbanen — fra Skoppum, ikke fra Horten sentrum"],
+  ["Hadeland: Gran og Lunner","Innlandstrafikk","Innlandstrafikk","Vy over Gjøvikbanen fra Gran eller Jaren"],
+  ["Jevnaker","Brakar","Brakar","Samme dalføre som Hadeland, men Buskerud — og dermed Brakar"],
+  ["Eidsvoll","Ruter","Ruter","Ruter-billetten gjelder på toget via Oslo lufthavn"],
+  ["Kongsberg","Brakar","Brakar","Vy lokaltog; Go-Ahead på de gjennomgående Sørlandsbanen-togene"]
+];
+function buildBill(){
+  document.getElementById("billtable").innerHTML = BILL.map(([o,b,a,t])=>
+    '<tr><td class="area">'+esc(o)+'</td><td>'+esc(b)+'</td><td>'+esc(a)+'</td><td><em>'+esc(t)+'</em></td></tr>'
+  ).join("");
+}
+
 /* ---- fallgruver ---- */
 const TRAPS = [
+  ["Fylkesgrensa","Fylkesbilletten stopper der fylket slutter","ØstfoldBillett, VKT, Innlandstrafikk og Brakar gjelder bussene i sitt eget fylke. Skal du videre inn i Oslo, kommer toget eller Ruter-sonen i tillegg — eller du kjøper hele reisen i Entur og slipper å tenke på grensa."],
+  ["Nesodden og Eidsvoll","Ruter-billetten gjelder på toget","Innenfor Ruters soner er Vy-toget en del av Ruter-nettet. Kjøper du Vy-billett i tillegg, betaler du to ganger for samme tur."],
+  ["Hadeland","Jevnaker ligger i et annet billettsystem","Gran og Lunner er Innlandet og dekkes av Innlandstrafikk. Jevnaker hører geografisk til Hadeland, men ligger i Buskerud — der er det Brakar som gjelder."],
+  ["Horten","Stasjonen ligger ikke i byen","Vestfoldbanen stopper på Skoppum, noen kilometer utenfor Horten. Legg VKT-bussen inn i reisetiden, og sjekk at den korresponderer med toget."],
+  ["Moss og Horten","Ferja slår omveien rundt fjorden","Bastø Fosen bruker 30 minutter over Oslofjorden. Toget rundt via Drammen og Oslo bruker to og en halv time — og koster mer."],
+  ["Kongsberg og Eidsvoll","Samme togline, tre fylker","Du kan reise fra Kongsberg til Eidsvoll uten å bytte tog, men billetten krysser Buskerud, Oslo og Akershus. Verken Brakar eller Ruter dekker hele strekningen; Vy og Entur gjør det."],
   ["Barcelona","T-casual gjelder ikke på flyplassmetroen","Metro L9 Sud til T1 og T2 krever egen flyplassbillett. Rodalies-toget R2 Nord til T2 ligger derimot i sone 1 og går på vanlig T-casual."],
   ["Barcelona","Bicing kan du ikke bruke som tilreisende","Bysykkelen krever spansk adresse og registrering. Trenger du to hjul, er det Cooltra, Yego eller vanlig sykkelutleie som gjelder."],
   ["Oslo","Flytoget mot lokaltoget","Vy R11 og R13 bruker tre minutter mer til Gardermoen til omtrent halve prisen. Flytoget er verdt merprisen når du triller tungt utstyr eller har knapp margin."],
@@ -701,7 +828,7 @@ function buildTraps(){
   ).join("");
 }
 
-buildSelects(); buildSeg("pri","pri"); buildSeg("bag","bag"); buildRef(); buildTraps(); render();
+buildSelects(); buildSeg("pri","pri"); buildSeg("bag","bag"); buildBill(); buildRef(); buildTraps(); render();
 </script>
 
 </body>
