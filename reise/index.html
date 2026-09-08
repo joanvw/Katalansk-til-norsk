@@ -1,0 +1,708 @@
+<!doctype html>
+<html lang="no">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>:root{color-scheme:light dark}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+</head>
+<body>
+<title>Rett app, rett rute</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Familjen+Grotesk:wght@400;500;600;700&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+:root{
+  --ground:#EDEFEC;
+  --surface:#FBFCFA;
+  --surface-2:#E4E8E4;
+  --ink:#141918;
+  --ink-2:#4B5654;
+  --ink-3:#78827F;
+  --line:#CFD5D0;
+  --line-2:#B9C1BC;
+  --accent:#0E6F6B;
+  --accent-soft:#D8E8E5;
+  --cheap:#7E5406;
+  --cheap-soft:#F0E6D2;
+  --fast:#9C2338;
+  --fast-soft:#F4DFE2;
+  --shadow:0 1px 0 rgba(20,25,24,.05), 0 8px 24px -18px rgba(20,25,24,.5);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --ground:#0E1313;
+    --surface:#161D1D;
+    --surface-2:#1F2827;
+    --ink:#E9EEEB;
+    --ink-2:#A7B3AF;
+    --ink-3:#7D8884;
+    --line:#293332;
+    --line-2:#3A4544;
+    --accent:#54C2B5;
+    --accent-soft:#12302E;
+    --cheap:#D8A54A;
+    --cheap-soft:#2A2418;
+    --fast:#EC8298;
+    --fast-soft:#2E1B20;
+    --shadow:0 1px 0 rgba(0,0,0,.4), 0 8px 24px -18px #000;
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#0E1313;
+  --surface:#161D1D;
+  --surface-2:#1F2827;
+  --ink:#E9EEEB;
+  --ink-2:#A7B3AF;
+  --ink-3:#7D8884;
+  --line:#293332;
+  --line-2:#3A4544;
+  --accent:#54C2B5;
+  --accent-soft:#12302E;
+  --cheap:#D8A54A;
+  --cheap-soft:#2A2418;
+  --fast:#EC8298;
+  --fast-soft:#2E1B20;
+  --shadow:0 1px 0 rgba(0,0,0,.4), 0 8px 24px -18px #000;
+}
+
+*{box-sizing:border-box}
+body{
+  background:var(--ground);
+  color:var(--ink);
+  font-family:"Atkinson Hyperlegible","Helvetica Neue",Arial,sans-serif;
+  font-size:16px;
+  line-height:1.55;
+  -webkit-font-smoothing:antialiased;
+}
+h1,h2,h3,h4{font-family:"Familjen Grotesk","Helvetica Neue",Arial,sans-serif;text-wrap:balance;margin:0;font-weight:600;letter-spacing:-.015em}
+a{color:inherit}
+.wrap{max-width:1120px;margin:0 auto;padding:0 24px}
+
+/* ---- masthead ---- */
+.masthead{border-bottom:1px solid var(--line);background:var(--surface)}
+.masthead .wrap{padding-top:38px;padding-bottom:34px;display:grid;gap:14px}
+.eyebrow{
+  font-family:"IBM Plex Mono",ui-monospace,monospace;
+  font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);
+  display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+}
+.eyebrow::before{content:"";width:26px;height:2px;background:var(--accent);display:inline-block}
+h1{font-size:clamp(38px,6vw,60px);line-height:1.02;font-weight:700;letter-spacing:-.03em}
+.lede{max-width:62ch;color:var(--ink-2);font-size:17px}
+
+/* ---- layout ---- */
+.main{padding:34px 0 8px;display:grid;grid-template-columns:326px minmax(0,1fr);gap:34px;align-items:start}
+@media (max-width:900px){.main{grid-template-columns:1fr;gap:26px}}
+
+/* ---- controls ---- */
+.panel{position:sticky;top:20px;background:var(--surface);border:1px solid var(--line);border-radius:4px;padding:22px;display:grid;gap:20px;box-shadow:var(--shadow)}
+@media (max-width:900px){.panel{position:static}}
+.panel h2{font-size:13px;font-family:"IBM Plex Mono",ui-monospace,monospace;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3)}
+.field{display:grid;gap:7px}
+.field > label{font-size:12.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-2);font-weight:700}
+select{
+  width:100%;appearance:none;background:var(--ground);color:var(--ink);
+  border:1px solid var(--line-2);border-radius:3px;padding:11px 34px 11px 12px;
+  font-family:inherit;font-size:15px;cursor:pointer;
+  background-image:linear-gradient(45deg,transparent 50%,currentColor 50%),linear-gradient(135deg,currentColor 50%,transparent 50%);
+  background-position:calc(100% - 17px) calc(50% + 1px),calc(100% - 12px) calc(50% + 1px);
+  background-size:5px 5px,5px 5px;background-repeat:no-repeat;
+}
+select:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.seg{display:grid;grid-template-columns:repeat(3,1fr);border:1px solid var(--line-2);border-radius:3px;overflow:hidden}
+.seg button{
+  font-family:inherit;font-size:13.5px;font-weight:700;padding:10px 4px;cursor:pointer;
+  background:var(--ground);color:var(--ink-2);border:0;border-right:1px solid var(--line-2);
+}
+.seg button:last-child{border-right:0}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--surface)}
+.seg.bag button[aria-pressed="true"]{background:var(--ink);color:var(--surface)}
+.swap{
+  justify-self:start;background:none;border:0;padding:2px 0;cursor:pointer;
+  font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:12px;color:var(--accent);letter-spacing:.06em;
+}
+.swap:hover{text-decoration:underline}
+.panel-note{font-size:13px;color:var(--ink-3);border-top:1px solid var(--line);padding-top:14px;line-height:1.5}
+
+/* ---- plan ---- */
+.route-head{display:flex;flex-wrap:wrap;align-items:baseline;gap:10px 14px;margin-bottom:6px}
+.route-head h2{font-size:27px}
+.route-head .meta{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:12.5px;color:var(--ink-3);letter-spacing:.04em}
+.plan{display:grid;gap:0;margin-top:22px}
+.stage{display:grid;grid-template-columns:34px minmax(0,1fr);gap:18px;padding-bottom:30px;position:relative}
+.stage:last-child{padding-bottom:6px}
+.rail{display:grid;justify-items:center;gap:6px}
+.dot{
+  width:30px;height:30px;border-radius:50%;display:grid;place-items:center;
+  background:var(--surface);border:1.5px solid var(--line-2);color:var(--ink-2);
+  font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:13px;font-weight:600;
+}
+.stage.key .dot{background:var(--accent);border-color:var(--accent);color:var(--surface)}
+.line{width:1.5px;flex:1;background:var(--line-2);height:100%;min-height:10px}
+.stage:last-child .line{display:none}
+.stage h3{font-size:19px;margin-bottom:2px}
+.stage .sub{color:var(--ink-2);font-size:14.5px;max-width:64ch;margin-bottom:12px}
+.stage .sub b{color:var(--ink)}
+
+/* option cards */
+.opts{display:grid;gap:10px}
+.opt{background:var(--surface);border:1px solid var(--line);border-radius:4px;padding:14px 16px;display:grid;gap:9px}
+.opt.rec{border-color:var(--accent);box-shadow:inset 3px 0 0 var(--accent)}
+.opt-top{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px}
+.opt-name{font-family:"Familjen Grotesk",sans-serif;font-weight:600;font-size:16.5px}
+.tag{
+  font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:10.5px;font-weight:600;
+  letter-spacing:.1em;text-transform:uppercase;padding:3px 7px;border-radius:2px;white-space:nowrap;
+}
+.tag.rec{background:var(--accent-soft);color:var(--accent)}
+.tag.cheap{background:var(--cheap-soft);color:var(--cheap)}
+.tag.fast{background:var(--fast-soft);color:var(--fast)}
+.spec{margin-left:auto;display:flex;gap:14px;font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:13px;color:var(--ink-2);font-variant-numeric:tabular-nums;white-space:nowrap}
+.spec .price{color:var(--ink);font-weight:600}
+.opt .why{font-size:14.5px;color:var(--ink-2);max-width:66ch}
+.opt .why em{font-style:normal;color:var(--fast);font-weight:700}
+@media (max-width:560px){.spec{margin-left:0;width:100%}}
+
+/* app chips */
+.apps{display:flex;flex-wrap:wrap;gap:7px}
+.app{
+  display:inline-flex;align-items:baseline;gap:7px;text-decoration:none;
+  background:var(--ground);border:1px solid var(--line-2);border-radius:2px;padding:6px 10px;font-size:14px;
+}
+.app:hover{border-color:var(--accent);background:var(--accent-soft)}
+.app b{font-weight:700}
+.app span{color:var(--ink-3);font-size:12.5px;font-family:"IBM Plex Mono",ui-monospace,monospace}
+
+/* gear callout */
+.gear{
+  display:grid;gap:4px;background:var(--cheap-soft);border-left:3px solid var(--cheap);
+  padding:11px 14px;border-radius:0 3px 3px 0;font-size:14.5px;color:var(--ink);max-width:66ch;
+}
+.gear b{font-family:"Familjen Grotesk",sans-serif;font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--cheap)}
+
+/* ---- reference ---- */
+.ref{border-top:1px solid var(--line);margin-top:30px;padding:44px 0 0}
+.ref h2{font-size:26px;margin-bottom:6px}
+.ref .intro{color:var(--ink-2);max-width:62ch;margin-bottom:22px}
+.tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:4px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;min-width:720px;font-size:14.5px}
+th,td{text-align:left;padding:12px 16px;border-bottom:1px solid var(--line);vertical-align:top}
+thead th{
+  font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:11px;letter-spacing:.11em;
+  text-transform:uppercase;color:var(--ink-3);font-weight:600;background:var(--surface-2);
+}
+tbody tr:last-child td{border-bottom:0}
+td.area{font-family:"Familjen Grotesk",sans-serif;font-weight:600;white-space:nowrap}
+td.area small{display:block;font-family:"IBM Plex Mono",ui-monospace,monospace;font-weight:400;font-size:11.5px;color:var(--ink-3);letter-spacing:.04em}
+td em{font-style:normal;color:var(--ink-2)}
+
+/* ---- gotchas ---- */
+.traps{padding:46px 0 10px}
+.traps h2{font-size:26px;margin-bottom:18px}
+.trapgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(268px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:4px;overflow:hidden}
+.trap{background:var(--surface);padding:18px 20px;display:grid;gap:6px;align-content:start}
+.trap h3{font-size:16px}
+.trap p{margin:0;font-size:14.5px;color:var(--ink-2)}
+.trap .where{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:10.5px;letter-spacing:.11em;text-transform:uppercase;color:var(--ink-3)}
+
+footer{border-top:1px solid var(--line);margin-top:46px;padding:26px 0 44px;color:var(--ink-3);font-size:13.5px}
+footer p{margin:0 0 6px;max-width:70ch}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+
+<header class="masthead">
+  <div class="wrap">
+    <p class="eyebrow">Reiseplanlegger · Norge ↔ Catalonia ↔ Europa</p>
+    <h1>Rett app, rett rute</h1>
+    <p class="lede">Velg hvor du reiser fra og til. Siden setter opp reisen etappe for etappe og forteller hvilken app du faktisk trenger i hvert ledd — og hva som skiller den billigste veien fra den raskeste.</p>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="main">
+    <form class="panel" id="panel" onsubmit="return false">
+      <h2>Reisen din</h2>
+      <div class="field">
+        <label for="from">Fra</label>
+        <select id="from"></select>
+      </div>
+      <div class="field">
+        <label for="to">Til</label>
+        <select id="to"></select>
+      </div>
+      <button type="button" class="swap" id="swap">↕ Bytt retning</button>
+      <div class="field">
+        <label>Prioritet</label>
+        <div class="seg" id="pri">
+          <button type="button" data-v="cheap">Billigst</button>
+          <button type="button" data-v="balanced">Balansert</button>
+          <button type="button" data-v="fast">Raskest</button>
+        </div>
+      </div>
+      <div class="field">
+        <label>Bagasje</label>
+        <div class="seg bag" id="bag">
+          <button type="button" data-v="hand">Håndbagasje</button>
+          <button type="button" data-v="hold">Koffert</button>
+          <button type="button" data-v="gear">Utstyr</button>
+        </div>
+      </div>
+      <p class="panel-note">Prisnivå er vist som <b>€ / €€ / €€€</b> i stedet for kroner, fordi takstene endrer seg raskere enn en side som denne. Tidene er dør-til-dør-anslag for én etappe.</p>
+    </form>
+
+    <section id="result" aria-live="polite"></section>
+  </div>
+
+  <section class="ref">
+    <h2>Områdene og appene som dekker dem</h2>
+    <p class="intro">Én app er sjelden nok: én for å søke opp reisen, én for billetten, og ofte en tredje for siste kilometer. Tabellen er oppslagsverket bak planleggeren.</p>
+    <div class="tablewrap">
+      <table>
+        <thead>
+          <tr><th>Område</th><th>Rundt i byen</th><th>Til og fra flyplassen</th><th>Ut av området</th></tr>
+        </thead>
+        <tbody id="reftable"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="traps">
+    <h2>Fallgruvene som koster deg penger eller tid</h2>
+    <div class="trapgrid" id="traps"></div>
+  </section>
+
+  <footer>
+    <p>Rutetider, priser og appdekning endrer seg. Sjekk alltid siste avgang og gjeldende takst i appen før du kjøper — særlig for nattbuss, ferje og sesongruter på Costa Brava og i Pyreneene.</p>
+    <p>Sist gjennomgått september 2026.</p>
+  </footer>
+</div>
+
+<script>
+/* ---------------------------------------------------------------
+   Appregister. [navn, url, hva appen faktisk gjør for deg]
+--------------------------------------------------------------- */
+const APPS = {
+  entur:     ["Entur","https://entur.no","all norsk kollektivtrafikk i ett søk"],
+  ruter:     ["Ruter","https://ruter.no","Oslo og Akershus"],
+  vy:        ["Vy","https://vy.no","tog + Minipris"],
+  flytoget:  ["Flytoget","https://flytoget.no","Oslo S – OSL"],
+  skyss:     ["Skyss Billett","https://skyss.no","Bergen og Vestland"],
+  atb:       ["AtB","https://atb.no","Trondheim og Trøndelag"],
+  kolumbus:  ["Kolumbus Billett","https://kolumbus.no","Stavanger og Rogaland"],
+  svipper:   ["Svipper","https://svipper.no","Troms og Nord-Norge"],
+  norway:    ["NOR-WAY Bussekspress","https://nor-way.no","ekspressbuss i Norge"],
+  flybussen: ["Flybussen","https://flybussen.no","Værnes, Sola, Flesland, Tromsø"],
+  bysykkel:  ["Oslo Bysykkel","https://oslobysykkel.no","sesong april–november"],
+  ryde:      ["Ryde / Bolt / Voi","https://ryde.app","elsparkesykkel"],
+  boltno:    ["Bolt / Uber","https://bolt.eu","taxi i norske byer"],
+  norwegian: ["Norwegian","https://norwegian.no","flest innenlandsruter"],
+  sas:       ["SAS","https://flysas.com","innenlands + Europa"],
+  wideroe:   ["Widerøe","https://wideroe.no","kortbanenettet"],
+  hurtigruten:["Hurtigruten / Havila","https://havilavoyages.com","kystruta Bergen–Kirkenes"],
+
+  tmb:       ["TMB App","https://tmb.cat","metro og buss i Barcelona"],
+  tmob:      ["T-mobilitat","https://tmobilitat.cat","T-casual og T-usual"],
+  rodalies:  ["Rodalies de Catalunya","https://rodalies.gencat.cat","lokaltog R1–R17"],
+  fgc:       ["FGC","https://fgc.cat","Vallès, Llobregat, Pyreneene"],
+  renfe:     ["Renfe","https://renfe.com","AVE, Avant, Avlo, Cercanías"],
+  ouigo:     ["OUIGO España","https://ouigo.com","lavpris høyhastighet"],
+  iryo:      ["iryo","https://iryo.eu","høyhastighet, ofte under AVE"],
+  alsa:      ["ALSA","https://alsa.es","langdistansebuss i Spania"],
+  sagales:   ["Moventis / Sagalés","https://moventis.es","Costa Brava og Girona"],
+  aerobus:   ["Aerobús","https://aerobusbcn.com","Pl. Catalunya – BCN"],
+  bicing:    ["Bicing","https://bicing.barcelona","kun for registrerte fastboende"],
+  cabify:    ["Cabify / FreeNow","https://cabify.com","bil med sjåfør, BCN og Madrid"],
+  cooltra:   ["Cooltra / Yego","https://cooltra.com","elmoped-deling"],
+  metromad:  ["Metro de Madrid","https://metromadrid.es","metro og billetter"],
+  emt:       ["EMT Madrid","https://emtmadrid.es","bybuss og Exprés Aeropuerto"],
+  metrovlc:  ["Metrovalencia / EMT","https://metrovalencia.es","València"],
+  blablacar: ["BlaBlaCar","https://blablacar.es","samkjøring, stort i Spania"],
+  vueling:   ["Vueling","https://vueling.com","flest direkteruter fra BCN"],
+  ryanair:   ["Ryanair / Wizz Air","https://ryanair.com","Torp, Girona, Reus"],
+
+  skyscanner:["Skyscanner","https://skyscanner.no","sammenlign selskap og datoer"],
+  gflights:  ["Google Flights","https://google.com/travel/flights","prisgraf over hele måneden"],
+  omio:      ["Omio","https://omio.com","tog, buss og fly i ett søk"],
+  trainline: ["Trainline","https://thetrainline.com","europeiske togbilletter"],
+  rome2rio:  ["Rome2Rio","https://rome2rio.com","viser alle mulige veier"],
+  flixbus:   ["FlixBus","https://flixbus.no","billigst over lange strekk"],
+  interrail: ["Interrail","https://interrail.eu","lønner seg fra 4–5 etapper"]
+};
+
+/* ---------------------------------------------------------------
+   Områder. air.opts = veiene inn og ut av flyplassen.
+--------------------------------------------------------------- */
+const AREAS = {
+  oslo:{ n:"Oslo & Østlandet", g:"Norge", c:"no", hub:"OSL Gardermoen", rail:"Oslo S",
+    local:["ruter","entur","boltno","bysykkel","ryde"],
+    localNote:"Ruter dekker buss, trikk, T-bane, båt og lokaltog i hele Oslo og Akershus på én billett. Entur er søket når reisen fortsetter ut av Ruter-området.",
+    air:[
+      {n:"Vy lokaltog R11 / R13 fra Oslo S",t:"23 min",mins:23,pr:2,apps:["vy","entur"],why:"Går fire ganger i timen og koster rundt halvparten av Flytoget for tre minutter mer.",cheap:1},
+      {n:"Flytoget",t:"20 min",mins:20,pr:3,apps:["flytoget"],why:"Hvert 10. minutt, brede bagasjehyller, egen avgangsplattform på Oslo S.",fast:1},
+      {n:"Bolt eller taxi",t:"40–55 min",mins:48,pr:4,apps:["boltno"],why:"Bare verdt det om du er flere som deler, eller reiser før første tog.",gear:1}
+    ]},
+  bergen:{ n:"Bergen & Vestland", g:"Norge", c:"no", hub:"BGO Flesland", rail:"Bergen stasjon",
+    local:["skyss","entur","boltno"],
+    localNote:"Skyss Billett dekker Bybanen, bybuss og lokalbåtene. Fjordbygdene rundt nås med Skyss-buss og ferje — søk dem opp i Entur.",
+    air:[
+      {n:"Bybanen linje 1 fra sentrum",t:"45 min",mins:45,pr:1,apps:["skyss"],why:"Trikken går helt inn i terminalbygget. Ingen grunn til å velge noe annet.",cheap:1,fast:1},
+      {n:"Taxi",t:"25 min",mins:25,pr:4,apps:["boltno"],why:"Sparer 20 minutter til en mangedobbelt pris.",gear:1}
+    ]},
+  stavanger:{ n:"Stavanger & Rogaland", g:"Norge", c:"no", hub:"SVG Sola", rail:"Stavanger stasjon",
+    local:["kolumbus","entur","boltno"],
+    localNote:"Kolumbus dekker buss, bybåt og Jærbanen i hele Rogaland på samme billett.",
+    air:[
+      {n:"Kolumbus buss X60 / rutebuss",t:"30 min",mins:30,pr:1,apps:["kolumbus","entur"],why:"Vanlig busstakst, langt billigere enn flybussen.",cheap:1},
+      {n:"Flybussen",t:"25 min",mins:25,pr:2,apps:["flybussen"],why:"Direkte fra sentrum og hotellene, med bagasjerom.",fast:1,gear:1}
+    ]},
+  trondheim:{ n:"Trondheim & Trøndelag", g:"Norge", c:"no", hub:"TRD Værnes", rail:"Trondheim S",
+    local:["atb","entur","boltno"],
+    localNote:"AtB dekker buss, trikk og båt i Trøndelag. Metrobussene går ofte nok til at du slipper å planlegge.",
+    air:[
+      {n:"Trønderbanen fra Trondheim S",t:"35 min",mins:35,pr:1,apps:["vy","entur","atb"],why:"Toget stopper i undergangen på Værnes — tørrskodd hele veien.",cheap:1,fast:1},
+      {n:"Værnesekspressen",t:"40 min",mins:40,pr:2,apps:["flybussen"],why:"Henter i sentrum og på hotellene, greit med mye bagasje.",gear:1}
+    ]},
+  tromso:{ n:"Tromsø & Nord-Norge", g:"Norge", c:"no", hub:"TOS Langnes", rail:"—",
+    local:["svipper","entur","boltno"],
+    localNote:"Svipper er billettappen i Troms og Finnmark. Utenfor byene er hurtigbåt og ferje en del av rutenettet — de ligger i Entur.",
+    air:[
+      {n:"Bybuss linje 40 / 42",t:"15 min",mins:15,pr:1,apps:["svipper"],why:"Flyplassen ligger i byen. Vanlig bussbillett holder.",cheap:1,fast:1},
+      {n:"Flybussen eller taxi",t:"12 min",mins:12,pr:3,apps:["flybussen","boltno"],why:"Kort tur, men praktisk når du lander midt på natten.",gear:1}
+    ]},
+  norge:{ n:"Resten av Norge", g:"Norge", c:"no", hub:"nærmeste kortbaneflyplass", rail:"nærmeste stasjon",
+    local:["entur","norway","boltno"],
+    localNote:"Entur er felles for alle fylkesselskapene og viser buss, tog, ferje og hurtigbåt. Selve billetten må av og til kjøpes i fylkets egen app — Entur sier hvilken.",
+    air:[
+      {n:"Fylkesbuss eller lokaltog",t:"varierer",mins:60,pr:1,apps:["entur"],why:"Søk fra adresse til flyplass i Entur; den setter sammen buss, båt og tog for deg.",cheap:1,fast:1}
+    ]},
+
+  barcelona:{ n:"Barcelona & storbyområdet", g:"Catalonia", c:"es", hub:"BCN El Prat", rail:"Barcelona Sants",
+    local:["tmob","tmb","rodalies","fgc","cabify","cooltra"],
+    localNote:"Metro, bybuss, FGC, sporvogn og Rodalies inne i sone 1 ligger under samme takst. Kjøp T-casual i T-mobilitat-appen eller på kort, så gjelder den på tvers av selskapene.",
+    air:[
+      {n:"Rodalies R2 Nord til T2",t:"20–25 min",mins:23,pr:1,apps:["rodalies","tmob"],why:"Går fra Sants og Passeig de Gràcia og dekkes av T-casual sone 1. Gratis shuttlebuss videre til T1.",cheap:1},
+      {n:"Aerobús fra Plaça Catalunya",t:"35 min",mins:35,pr:2,apps:["aerobus"],why:"Hvert 5. minutt, eget bagasjerom, kjører rett til riktig terminal.",gear:1},
+      {n:"Metro L9 Sud",t:"32 min",mins:32,pr:2,apps:["tmb"],why:"Egen flyplassbillett — T-casual gjelder ikke her. Krever bytte fra L1, L3 eller L5.",},
+      {n:"Cabify eller FreeNow",t:"25–45 min",mins:35,pr:4,apps:["cabify"],why:"Rush på Gran Via kan spise hele tidsgevinsten.",fast:1}
+    ]},
+  girona:{ n:"Girona & Costa Brava", g:"Catalonia", c:"es", hub:"GRO Girona-Costa Brava", rail:"Girona stasjon",
+    local:["sagales","rodalies","renfe"],
+    localNote:"Kystbyene fra Blanes til Cadaqués nås med Sagalés/Moventis-buss fra Girona eller Barcelona Nord. Rutene er sesongavhengige — sjekk siste avgang før du drar ut.",
+    air:[
+      {n:"Sagalés-buss fra Girona busstasjon",t:"25 min",mins:25,pr:1,apps:["sagales"],why:"Følger flyavgangene. Samme selskap kjører også direkte til Barcelona Nord.",cheap:1,fast:1}
+    ]},
+  tarragona:{ n:"Tarragona & Costa Daurada", g:"Catalonia", c:"es", hub:"REU Reus", rail:"Camp de Tarragona",
+    local:["rodalies","renfe","alsa"],
+    localNote:"Rodalies R15/R16/R17 binder sammen kysten sørover. Legg merke til at høyhastighetstogene stopper på Camp de Tarragona, et stykke utenfor byen.",
+    air:[
+      {n:"Buss Tarragona – Reus lufthavn",t:"30 min",mins:30,pr:1,apps:["alsa","sagales"],why:"Få avganger utenom sesong; BCN er ofte det reelle alternativet.",cheap:1,fast:1}
+    ]},
+  pirineus:{ n:"Lleida & Pyreneene", g:"Catalonia", c:"es", hub:"BCN via Lleida", rail:"Lleida Pirineus",
+    local:["fgc","rodalies","alsa"],
+    localNote:"FGC kjører linjene opp mot La Molina og Núria; ALSA og lokale selskap dekker dalførene. Vinterstid går det egne skibusser fra Barcelona.",
+    air:[
+      {n:"Avant/AVE til Barcelona, videre til BCN",t:"1 t 55 min",mins:115,pr:2,apps:["renfe","rodalies"],why:"Lleida har ingen egen rutetrafikk av betydning — BCN er flyplassen din.",cheap:1,fast:1}
+    ]},
+  madrid:{ n:"Madrid", g:"Spania ellers", c:"es", hub:"MAD Barajas", rail:"Atocha / Chamartín",
+    local:["metromad","emt","renfe","cabify"],
+    localNote:"Metro de Madrid dekker byen; Cercanías (i Renfe-appen) tar deg til forstedene og mellom Atocha og Chamartín.",
+    air:[
+      {n:"Cercanías C-1 til T4",t:"25 min",mins:25,pr:1,apps:["renfe"],why:"Billigst, og går rett fra Atocha og Chamartín. Bare til T4.",cheap:1},
+      {n:"Metro linje 8 fra Nuevos Ministerios",t:"20 min",mins:20,pr:2,apps:["metromad"],why:"Raskest fra sentrum, men husk flyplasstillegget i tillegg til vanlig billett.",fast:1},
+      {n:"Exprés Aeropuerto (buss 203)",t:"40 min",mins:40,pr:1,apps:["emt"],why:"Går hele døgnet — den eneste ordentlige natteveien til flyplassen.",gear:1}
+    ]},
+  valencia:{ n:"València", g:"Spania ellers", c:"es", hub:"VLC Manises", rail:"València Joaquín Sorolla",
+    local:["metrovlc","renfe","cabify"],
+    localNote:"Metrovalencia og EMT-bussene deler sonesystem. Sykkelbyen er flat — bysykkelen Valenbisi er reell transport her.",
+    air:[
+      {n:"Metrovalencia linje 3 / 5",t:"25 min",mins:25,pr:1,apps:["metrovlc"],why:"Metroen går inn på flyplassen; ingen grunn til taxi.",cheap:1,fast:1}
+    ]},
+  spania:{ n:"Resten av Spania", g:"Spania ellers", c:"es", hub:"nærmeste lufthavn", rail:"nærmeste Renfe-stasjon",
+    local:["renfe","alsa","cabify","blablacar"],
+    localNote:"Utenfor storbyene er ALSA-buss og BlaBlaCar ofte det eneste som går. Renfe Cercanías finnes rundt de større byene.",
+    air:[
+      {n:"Buss eller Cercanías",t:"varierer",mins:45,pr:1,apps:["alsa","renfe"],why:"Slå opp strekningen i Rome2Rio først — den viser hvilke selskap som faktisk kjører.",cheap:1,fast:1}
+    ]},
+  europa:{ n:"Andre europeiske byer", g:"Europa", c:"eu", hub:"nærmeste lufthavn", rail:"byens hovedstasjon",
+    local:["rome2rio","omio","trainline"],
+    localNote:"Rome2Rio viser hvilke lokale selskap som finnes på stedet; Omio selger billetten i de fleste land.",
+    air:[
+      {n:"Flytog eller flybuss",t:"varierer",mins:40,pr:2,apps:["rome2rio","omio"],why:"Nesten alle større europeiske flyplasser har skinnegående forbindelse til sentrum.",cheap:1,fast:1}
+    ]}
+};
+</script>
+<script>
+/* ---------------------------------------------------------------
+   Hovedstrekningen. Navngitte strekninger først, så generiske
+   fallbacks per landpar.
+--------------------------------------------------------------- */
+const O = (n,t,mins,pr,apps,why,flags) => Object.assign({n,t,mins,pr,apps,why},flags||{});
+
+const CORRIDORS = {
+  "bergen|oslo":{book:["entur","vy","skyscanner"],opts:[
+    O("Bergensbanen med Vy","6 t 50 min",410,2,["vy","entur"],"Minipris fra 299 kr hvis du bokser tidlig, og du slipper hele flyplasslogistikken i begge ender.",{cheap:1,gear:1}),
+    O("Fly Norwegian eller SAS","55 min",55,3,["norwegian","sas","skyscanner"],"Selve flyturen er kort, men regn 3–4 timer dør til dør med Flesland og Gardermoen.",{fast:1}),
+    O("NOR-WAY Bussekspress","9–11 t",600,1,["norway","entur"],"Billigste vei over fjellet, og eneste alternativ når Bergensbanen er stengt for arbeid.",{})
+  ]},
+  "oslo|trondheim":{book:["entur","vy","skyscanner"],opts:[
+    O("Dovrebanen med Vy","6 t 40 min",400,2,["vy","entur"],"Nattoget er både reise og overnatting — sovekupé koster mindre enn hotell pluss fly.",{cheap:1,gear:1}),
+    O("Fly til Værnes","1 t",60,3,["norwegian","sas","skyscanner"],"Tett rutetilbud gjennom hele dagen.",{fast:1}),
+    O("Ekspressbuss","9 t",540,1,["norway","entur"],"Går når toget ikke gjør det.",{})
+  ]},
+  "oslo|stavanger":{book:["entur","vy","skyscanner"],opts:[
+    O("Sørlandsbanen med Vy","7 t 40 min",460,2,["vy","entur"],"Lang, men Minipris gjør den til den billigste sitteplassen mellom byene.",{cheap:1,gear:1}),
+    O("Fly til Sola","50 min",50,3,["norwegian","sas","skyscanner"],"Kortest tid med god margin.",{fast:1}),
+    O("Ekspressbuss via Kristiansand","9–10 t",570,1,["norway","entur"],"For når budsjettet er absolutt.",{})
+  ]},
+  "oslo|tromso":{book:["skyscanner","entur"],opts:[
+    O("Fly direkte","2 t",120,3,["norwegian","sas","skyscanner"],"Det finnes ikke tog til Tromsø. Fly er i praksis eneste reelle vei.",{fast:1,cheap:1}),
+    O("Tog til Bodø + Hurtigruten","2 døgn",2880,3,["vy","hurtigruten","entur"],"En reise i seg selv, ikke et transportvalg.",{})
+  ]},
+  "bergen|stavanger":{book:["entur","skyscanner"],opts:[
+    O("Kystbussen","4 t 45 min",285,1,["norway","entur"],"Ferjefri strekning nå, og betydelig billigere enn fly.",{cheap:1,gear:1}),
+    O("Fly","40 min",40,3,["norwegian","wideroe","skyscanner"],"Kort hopp langs kysten.",{fast:1})
+  ]},
+
+  "barcelona|madrid":{book:["renfe","ouigo","iryo","omio"],opts:[
+    O("OUIGO eller Avlo","2 t 45 min",165,1,["ouigo","renfe"],"Samme skinner som AVE til en brøkdel av prisen. Bagasjegrense og få avganger er avveiningen.",{cheap:1}),
+    O("AVE fra Sants til Atocha","2 t 30 min",150,3,["renfe"],"Halvtimesavganger, sentrum til sentrum. Slår fly dør til dør.",{fast:1,gear:1}),
+    O("iryo","2 t 35 min",155,2,["iryo"],"Ligger mellom de to i pris, og har som regel ledige plasser når Renfe er utsolgt.",{}),
+    O("ALSA-buss","7–8 t",450,1,["alsa","flixbus"],"Nattbussen sparer deg en hotellnatt.",{})
+  ]},
+  "barcelona|girona":{book:["rodalies","renfe","sagales"],opts:[
+    O("Rodalies R11 fra Sants","1 t 25 min",85,1,["rodalies","tmob"],"Går hver halvtime og krever ingen forhåndsbestilling.",{cheap:1,gear:1}),
+    O("AVE eller Avant","38 min",38,3,["renfe"],"Girona-stasjonen ligger midt i byen, så tiden er reell.",{fast:1}),
+    O("Sagalés-buss fra Barcelona Nord","1 t 30 min",90,1,["sagales"],"Nyttig når du skal videre ut på Costa Brava samme dag.",{})
+  ]},
+  "barcelona|tarragona":{book:["rodalies","renfe"],opts:[
+    O("Rodalies R16 / R17","1 t 20 min",80,1,["rodalies","tmob"],"Går inn til Tarragona sentrum, ikke til høyhastighetsstasjonen utenfor byen.",{cheap:1,gear:1}),
+    O("Avant til Camp de Tarragona","35 min",35,2,["renfe"],"Rask, men legg til 20 minutter buss inn til byen.",{fast:1})
+  ]},
+  "barcelona|pirineus":{book:["renfe","fgc","alsa"],opts:[
+    O("Rodalies R12 / R13 til Lleida","2 t 20 min",140,1,["rodalies","renfe"],"Den rimelige veien vestover; bytt til lokalbuss i Lleida.",{cheap:1}),
+    O("Avant eller AVE til Lleida","1 t",60,3,["renfe"],"Halverer reisetiden til fjellene.",{fast:1}),
+    O("FGC mot La Molina og Núria","2 t 30 min",150,2,["fgc"],"Egen linje fra Barcelona rett opp i fjellet — vinterstid med skibuss i andre enden.",{gear:1})
+  ]},
+  "barcelona|valencia":{book:["renfe","ouigo","omio"],opts:[
+    O("OUIGO eller Euromed","3 t",180,1,["ouigo","renfe"],"Kystbanen sørover, med havet på venstre side hele veien.",{cheap:1,gear:1}),
+    O("AVE via Madrid eller direkte Euromed","2 t 55 min",175,3,["renfe"],"Marginalt raskere til klart høyere pris.",{fast:1}),
+    O("ALSA-buss","4 t 15 min",255,1,["alsa","flixbus"],"Går ofte og koster lite.",{})
+  ]}
+};
+
+const FALLBACKS = {
+  "no|no":{book:["entur","skyscanner","vy"],opts:[
+    O("Tog og buss via Entur","varierer",300,1,["entur","vy","norway"],"Entur setter sammen tog, buss, ferje og hurtigbåt i én reise og viser totalprisen.",{cheap:1,gear:1}),
+    O("Innenriksfly","1–2 t",90,3,["norwegian","sas","wideroe","skyscanner"],"Widerøe dekker kortbanenettet der de store ikke går.",{fast:1})
+  ]},
+  "es|es":{book:["renfe","omio","rome2rio"],opts:[
+    O("Renfe langdistanse","varierer",180,2,["renfe","ouigo","iryo"],"Høyhastighetsnettet stråler ut fra Madrid — reiser på tvers går ofte innom hovedstaden.",{fast:1,gear:1}),
+    O("ALSA eller FlixBus","varierer",330,1,["alsa","flixbus"],"Dekker byer uten togforbindelse, og er nesten alltid billigst.",{cheap:1}),
+    O("BlaBlaCar","varierer",240,1,["blablacar"],"Reelt transportmiddel i Spania, ikke en nødløsning.",{})
+  ]},
+  "es|no":{book:["skyscanner","gflights","omio"],opts:[
+    O("Direktefly Oslo – Barcelona","3 t 20 min",200,2,["norwegian","vueling","sas","skyscanner"],"Norwegian og Vueling flyr strekningen daglig; SAS supplerer. Dette er standardvalget.",{fast:1,gear:1}),
+    O("Lavprisfly via Torp, Girona eller Reus","4–6 t inkl. transfer",330,1,["ryanair","skyscanner"],"Billettprisen er lav, men Torp ligger to timer fra Oslo og Girona en time fra Barcelona.",{cheap:1}),
+    O("Mellomlanding i København, Amsterdam eller Frankfurt","6–9 t",480,1,["skyscanner","gflights","sas"],"Ofte billigere enn direkte, og med bagasje inkludert.",{}),
+    O("Tog gjennom Europa","2–3 døgn",3000,3,["interrail","trainline","omio"],"Oslo–København–Hamburg–Paris–Barcelona. Et valg man tar av lyst eller klimahensyn, ikke for pris.",{})
+  ]},
+  "eu":{book:["skyscanner","omio","rome2rio"],opts:[
+    O("Fly","2–4 t",180,2,["skyscanner","gflights","norwegian","vueling"],"Sammenlign i Skyscanner med fleksible datoer før du binder deg til én dag.",{fast:1}),
+    O("Tog","varierer",480,2,["trainline","omio","interrail"],"Konkurransedyktig under 800 km, særlig fra sentrum til sentrum.",{gear:1}),
+    O("FlixBus","varierer",720,1,["flixbus","omio"],"Billigst over lange strekk, og går natt til natt.",{cheap:1})
+  ]}
+};
+
+function corridor(a,b){
+  const key = [a,b].sort().join("|");
+  if (CORRIDORS[key]) return CORRIDORS[key];
+  const ca = AREAS[a].c, cb = AREAS[b].c;
+  if (ca==="eu" || cb==="eu") return FALLBACKS["eu"];
+  const ck = [ca,cb].sort().join("|");
+  return FALLBACKS[ck] || FALLBACKS["eu"];
+}
+</script>
+<script>
+/* --------------------------------------------------------------- */
+const FLIGHT = new Set(["norwegian","sas","wideroe","vueling","ryanair"]);
+const BAND = ["","€","€€","€€€","€€€€"];
+const PRI_LABEL = {cheap:"billigst",balanced:"balansert",fast:"raskest"};
+const BAG_LABEL = {hand:"håndbagasje",hold:"koffert",gear:"utstyr og instrumenter"};
+
+const state = {from:"oslo", to:"barcelona", pri:"cheap", bag:"hold"};
+
+const esc = s => String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+function appChips(ids){
+  return '<div class="apps">' + ids.map(id=>{
+    const a = APPS[id]; if(!a) return "";
+    return '<a class="app" href="'+a[1]+'" target="_blank" rel="noopener"><b>'+esc(a[0])+'</b><span>'+esc(a[2])+'</span></a>';
+  }).join("") + '</div>';
+}
+
+function score(o,pri){
+  const maxM = 3000;
+  if(pri==="cheap")   return o.pr*1000 + o.mins;
+  if(pri==="fast")    return o.mins*10 + o.pr*40;
+  return (o.pr/4)*100 + (Math.min(o.mins,maxM)/maxM)*100;
+}
+function rank(opts,pri){
+  return opts.slice().sort((a,b)=>score(a,pri)-score(b,pri));
+}
+
+function gearNote(o){
+  if(state.bag==="gear"){
+    if(o.apps.includes("ryanair"))
+      return "Ryanair og Wizz har hard grense for spesialbagasje, og gebyret for et instrument kan overstige billetten. Regn ut totalprisen før du velger denne.";
+    if(o.gear) return "Godt valg med tungt utstyr: plass til stor bagasje, og ingen omlasting underveis.";
+    if(FLIGHT.has(o.apps.find(a=>FLIGHT.has(a))||""))
+      return "Meld inn instrument som spesialbagasje ved bestilling — plassen i lasterommet er begrenset per avgang.";
+    return null;
+  }
+  if(state.bag==="hold" && o.apps.includes("ryanair"))
+    return "Ruteprisen stiger raskt når kofferten legges til. Sammenlign totalprisen, ikke billettprisen.";
+  return null;
+}
+
+function optCard(o,isRec){
+  const tags = [];
+  if(isRec) tags.push('<span class="tag rec">Anbefalt</span>');
+  if(o.cheap) tags.push('<span class="tag cheap">Billigst</span>');
+  if(o.fast) tags.push('<span class="tag fast">Raskest</span>');
+  const g = gearNote(o);
+  return '<article class="opt'+(isRec?" rec":"")+'">'
+    + '<div class="opt-top"><span class="opt-name">'+esc(o.n)+'</span>'+tags.join("")
+    + '<span class="spec"><span>'+esc(o.t)+'</span><span class="price">'+BAND[o.pr]+'</span></span></div>'
+    + '<p class="why">'+esc(o.why)+'</p>'
+    + (g?'<div class="gear"><b>Bagasje</b>'+esc(g)+'</div>':"")
+    + appChips(o.apps)
+    + '</article>';
+}
+
+function stage(num,title,sub,body,key){
+  return '<section class="stage'+(key?" key":"")+'">'
+    + '<div class="rail"><div class="dot">'+num+'</div><div class="line"></div></div>'
+    + '<div><h3>'+title+'</h3><p class="sub">'+sub+'</p>'+body+'</div></section>';
+}
+
+function render(){
+  const from = AREAS[state.from], to = AREAS[state.to];
+  const head = '<div class="route-head"><h2>'+esc(from.n)+(state.from===state.to?"":" → "+esc(to.n))+'</h2>'
+    + '<span class="meta">prioritet: '+PRI_LABEL[state.pri]+' · bagasje: '+BAG_LABEL[state.bag]+'</span></div>';
+
+  if(state.from===state.to){
+    const air = rank(from.air,state.pri);
+    const body = head + '<div class="plan">'
+      + stage(1,"Rundt i "+esc(from.n), esc(from.localNote), appChips(from.local), true)
+      + stage(2,"Til og fra "+esc(from.hub),
+          "Samme strekning, tre priser. Slik ser den ut når du prioriterer "+PRI_LABEL[state.pri]+".",
+          '<div class="opts">'+air.map((o,i)=>optCard(o,i===0)).join("")+'</div>')
+      + '</div>';
+    document.getElementById("result").innerHTML = body;
+    return;
+  }
+
+  const cor = corridor(state.from,state.to);
+  const opts = rank(cor.opts,state.pri);
+  const rec = opts[0];
+  const flying = rec.apps.some(a=>FLIGHT.has(a));
+
+  const legOut = flying
+    ? {title:"Ut av "+esc(from.n)+" til "+esc(from.hub),
+       sub:"Den anbefalte hovedstrekningen går med fly, så første etappe er ut til flyplassen.",
+       body:'<div class="opts">'+rank(from.air,state.pri).map((o,i)=>optCard(o,i===0)).join("")+'</div>'}
+    : {title:"Fram til "+esc(from.rail),
+       sub:"Hovedstrekningen går på skinner eller vei fra sentrum, så du trenger bare lokaltransport dit.",
+       body:appChips(from.local)};
+
+  const legIn = flying
+    ? {title:"Fra "+esc(to.hub)+" og inn i "+esc(to.n),
+       sub:"Etappen folk glemmer når de sammenligner flypriser — den kan koste mer enn en time og en god del penger.",
+       body:'<div class="opts">'+rank(to.air,state.pri).map((o,i)=>optCard(o,i===0)).join("")+'</div>'}
+    : {title:"Fra "+esc(to.rail)+" og videre",
+       sub:"Du kommer inn midt i byen. Herfra holder det med lokalappen.",
+       body:appChips(to.local)};
+
+  document.getElementById("result").innerHTML = head + '<div class="plan">'
+    + stage(1,"Søk opp og book","Start bredt, book smalt. Disse viser hele tilbudet på strekningen før du binder deg til ett selskap.",appChips(cor.book))
+    + stage(2,legOut.title,legOut.sub,legOut.body)
+    + stage(3,"Hovedstrekningen","Rangert etter prioriteten din. "+esc(rec.n)+" kommer først når du vil ha det "+PRI_LABEL[state.pri]+".",
+        '<div class="opts">'+opts.map((o,i)=>optCard(o,i===0)).join("")+'</div>', true)
+    + stage(4,legIn.title,legIn.sub,legIn.body)
+    + stage(5,"Rundt i "+esc(to.n),esc(to.localNote),appChips(to.local))
+    + '</div>';
+}
+
+/* ---- kontroller ---- */
+function buildSelects(){
+  const groups = {};
+  Object.entries(AREAS).forEach(([id,a])=>{ (groups[a.g]=groups[a.g]||[]).push([id,a.n]); });
+  const html = Object.entries(groups).map(([g,items])=>
+    '<optgroup label="'+esc(g)+'">'+items.map(([id,n])=>'<option value="'+id+'">'+esc(n)+'</option>').join("")+'</optgroup>'
+  ).join("");
+  const f=document.getElementById("from"), t=document.getElementById("to");
+  f.innerHTML=html; t.innerHTML=html; f.value=state.from; t.value=state.to;
+  f.addEventListener("change",()=>{state.from=f.value;render();});
+  t.addEventListener("change",()=>{state.to=t.value;render();});
+  document.getElementById("swap").addEventListener("click",()=>{
+    [state.from,state.to]=[state.to,state.from]; f.value=state.from; t.value=state.to; render();
+  });
+}
+function buildSeg(id,key){
+  const el=document.getElementById(id);
+  const sync=()=>[...el.children].forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.v===state[key])));
+  el.addEventListener("click",e=>{
+    const b=e.target.closest("button"); if(!b) return;
+    state[key]=b.dataset.v; sync(); render();
+  });
+  sync();
+}
+
+/* ---- oppslagstabell ---- */
+const REF_OUT = {
+  oslo:"Vy og Entur til hele Sør-Norge, NOR-WAY ekspressbuss, direktefly til det meste av Europa",
+  bergen:"Bergensbanen, Kystbussen til Stavanger, direktefly til nordiske hovedsteder",
+  stavanger:"Sørlandsbanen, Kystbussen, tett flytilbud til Oslo og Nordsjøen",
+  trondheim:"Dovrebanen og Nordlandsbanen, ekspressbuss, fly til Oslo hver time",
+  tromso:"Kun fly og kystruta — ingen jernbane nord for Bodø",
+  norge:"Entur binder sammen fylkesbuss, tog, ferje og hurtigbåt til én reise",
+  barcelona:"AVE, OUIGO og iryo mot Madrid og València, Rodalies i hele Catalonia, direktefly til hele Europa",
+  girona:"Rodalies R11 og AVE til Barcelona, Sagalés-buss langs Costa Brava",
+  tarragona:"Rodalies nordover og sørover, Avant fra Camp de Tarragona",
+  pirineus:"Renfe og Rodalies til Lleida, FGC opp i fjellet, skibuss om vinteren",
+  madrid:"Navet i det spanske høyhastighetsnettet — alt går gjennom Atocha eller Chamartín",
+  valencia:"Euromed langs kysten, AVE til Madrid, ALSA sørover",
+  spania:"ALSA og FlixBus dekker byene uten togforbindelse",
+  europa:"Omio og Trainline for tog, Skyscanner for fly, FlixBus for de lange strekkene"
+};
+function buildRef(){
+  document.getElementById("reftable").innerHTML = Object.entries(AREAS).map(([id,a])=>
+    '<tr><td class="area">'+esc(a.n)+'<small>'+esc(a.hub)+'</small></td>'
+    + '<td>'+a.local.map(x=>esc(APPS[x][0])).join(", ")+'</td>'
+    + '<td>'+a.air.map(o=>esc(o.n)+' <em>('+o.t+')</em>').join("<br>")+'</td>'
+    + '<td><em>'+esc(REF_OUT[id]||"")+'</em></td></tr>'
+  ).join("");
+}
+
+/* ---- fallgruver ---- */
+const TRAPS = [
+  ["Barcelona","T-casual gjelder ikke på flyplassmetroen","Metro L9 Sud til T1 og T2 krever egen flyplassbillett. Rodalies-toget R2 Nord til T2 ligger derimot i sone 1 og går på vanlig T-casual."],
+  ["Barcelona","Bicing kan du ikke bruke som tilreisende","Bysykkelen krever spansk adresse og registrering. Trenger du to hjul, er det Cooltra, Yego eller vanlig sykkelutleie som gjelder."],
+  ["Oslo","Flytoget mot lokaltoget","Vy R11 og R13 bruker tre minutter mer til Gardermoen til omtrent halve prisen. Flytoget er verdt merprisen når du triller tungt utstyr eller har knapp margin."],
+  ["Oslo","Sparkesyklene stenger om natten","Utleie av elsparkesykler er forbudt i Oslo mellom 23 og 05. Planlegg siste etappe med nattbuss eller taxi i stedet."],
+  ["Norge","Minipris må kjøpes i forkant","Vy-billetten stiger trinnvis fram mot avgang. Kjøpt tidlig slår toget både buss og fly på pris — kjøpt på perrongen gjør det ikke."],
+  ["Spania","AVE er ikke eneste høyhastighetstog","OUIGO, Avlo og iryo kjører de samme strekningene til langt lavere priser. De ligger ikke i Renfe-appen, så du må søke dem opp hver for seg — eller bruke Omio."],
+  ["Catalonia","Girona og Reus er ikke Barcelona","Lavprisfly til «Barcelona Girona» lander en time nord for byen. Legg til bussbillett og transfertid før du sammenligner med et direktefly til El Prat."],
+  ["Norge","Én app dekker ikke hele landet","Entur planlegger reisen overalt, men billetten selges ofte i fylkets egen app: Ruter, Skyss, AtB, Kolumbus eller Svipper. Entur forteller deg hvilken."]
+];
+function buildTraps(){
+  document.getElementById("traps").innerHTML = TRAPS.map(([w,h,p])=>
+    '<div class="trap"><span class="where">'+esc(w)+'</span><h3>'+esc(h)+'</h3><p>'+esc(p)+'</p></div>'
+  ).join("");
+}
+
+buildSelects(); buildSeg("pri","pri"); buildSeg("bag","bag"); buildRef(); buildTraps(); render();
+</script>
+
+</body>
+</html>
