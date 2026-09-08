@@ -232,9 +232,9 @@ footer p{margin:0 0 6px;max-width:70ch}
 
 <header class="masthead">
   <div class="wrap">
-    <p class="eyebrow">Pendlerområdene rundt Oslo · og videre ut i Europa</p>
+    <p class="eyebrow">Pendlerområdene rundt Oslo · Island · og videre ut i Europa</p>
     <h1>Rett app, rett rute</h1>
-    <p class="lede">Nesodden, Moss, Horten, Hadeland, Eidsvoll og Kongsberg ligger i fem forskjellige billettsystemer. Velg hvor du reiser fra og til, så setter siden opp reisen etappe for etappe og forteller hvilken app som gjelder i hvert ledd — og hva som skiller den billigste veien fra den raskeste.</p>
+    <p class="lede">Nesodden, Moss, Horten, Hadeland, Eidsvoll og Kongsberg ligger i fem forskjellige billettsystemer. Velg hvor du reiser fra og til, så setter siden opp reisen etappe for etappe og forteller hvilken app som gjelder i hvert ledd — og hva som skiller den billigste veien fra den raskeste. Videre ut går den samme logikken til Island, Catalonia og resten av Europa.</p>
   </div>
 </header>
 
@@ -368,6 +368,15 @@ const APPS = {
   vueling:   ["Vueling","https://vueling.com","flest direkteruter fra BCN"],
   ryanair:   ["Ryanair / Wizz Air","https://ryanair.com","Torp, Girona, Reus"],
 
+  straeto:   ["Strætó","https://straeto.is","ruteplanlegger og sanntid for bussene"],
+  klappid:   ["Klappið","https://klappid.is","billettappen for Strætó"],
+  hopp:      ["Hopp","https://hopp.bike","elsparkesykler i Reykjavík"],
+  hreyfill:  ["Hreyfill / BSR","https://hreyfill.is","taxi — Uber og Bolt finnes ikke på Island"],
+  flybusis:  ["Flybus / Airport Direct","https://re.is","flybuss Keflavík – Reykjavík"],
+  icelandair:["Icelandair","https://icelandair.com","innenriks fra byflyplassen, og ruter til Europa"],
+  playair:   ["PLAY","https://flyplay.com","islandsk lavprisselskap"],
+  herjolfur: ["Herjólfur","https://herjolfur.is","ferja til Vestmannaeyjar"],
+  roadis:    ["road.is og safetravel.is","https://road.is","veistatus, stengte fjelloverganger og varsler"],
   skyscanner:["Skyscanner","https://skyscanner.no","sammenlign selskap og datoer"],
   gflights:  ["Google Flights","https://google.com/travel/flights","prisgraf over hele måneden"],
   omio:      ["Omio","https://omio.com","tog, buss og fly i ett søk"],
@@ -467,6 +476,29 @@ const AREAS = {
       {n:"Torp i stedet, via Drammen",t:"1 t 15 min",mins:75,pr:3,apps:["brakar","entur","boltno"],why:"Sandefjord lufthavn er nærmere enn Gardermoen om ruta di finnes der.",}
     ]},
 
+  reykjavik:{ n:"Reykjavík & hovedstadsområdet", g:"Island", c:"is", hub:"KEF Keflavík", rail:"BSÍ busstasjon",
+    local:["straeto","klappid","hopp","hreyfill"],
+    localNote:"Strætó kjører de gule bussene i hele hovedstadsområdet til flat takst. Strætó-appen planlegger reisen og viser sanntid, men selve billetten kjøper du i Klappið. Hopp har elsparkesykler over hele byen.",
+    air:[
+      {n:"Strætó rute 55 fra Reykjanesbær",t:"1 t 15 min",mins:75,pr:1,apps:["straeto","klappid"],why:"Den kollektive veien inn. Få avganger — sjekk i Strætó-appen om din stopper ved terminalen."},
+      {n:"Flybus eller Airport Direct",t:"45 min",mins:45,pr:2,apps:["flybusis"],why:"Følger flyankomstene hele døgnet, med bagasjerom og henting ved hotellene."},
+      {n:"Taxi fra Hreyfill eller BSR",t:"45 min",mins:45,pr:4,apps:["hreyfill"],why:"Mangedobbelt pris av flybussen, og ingen Uber eller Bolt å sammenligne med.",gear:1}
+    ]},
+  akureyri:{ n:"Akureyri & Nord-Island", g:"Island", c:"is", hub:"AEY Akureyri", rail:"Akureyri busstasjon",
+    local:["straeto","klappid","hreyfill"],
+    localNote:"Bybussene i Akureyri er gratis — du trenger ingen billett i det hele tatt. Strætó dekker rutene ut av byen, og de er langt tynnere.",
+    air:[
+      {n:"Bybuss til flyplassen",t:"10 min",mins:10,pr:1,apps:["straeto"],why:"Flyplassen ligger tre kilometer fra sentrum, og bussen dit koster ingenting."},
+      {n:"Taxi",t:"7 min",mins:7,pr:3,apps:["hreyfill"],why:"Kort tur, men den eneste som går tidlig om morgenen.",gear:1}
+    ]},
+  island:{ n:"Resten av Island", g:"Island", c:"is", hub:"nærmeste innenriks-flyplass", rail:"nærmeste busstopp",
+    local:["straeto","klappid","roadis","herjolfur"],
+    localNote:"Utenfor hovedstadsområdet er Strætós landsbygdsruter tynne og sesongavhengige. For alt utenom ringveien er leiebil i praksis forutsetningen — og da er road.is og safetravel.is de viktigste appene du har.",
+    air:[
+      {n:"Innenriksfly fra Reykjavíkurflugvöllur",t:"45 min",mins:45,pr:3,apps:["icelandair"],why:"Innenriks går fra byflyplassen i Reykjavík, ikke fra Keflavík. Overgangen mellom dem tar 45 minutter.",fast:1},
+      {n:"Strætó langs ringveien",t:"varierer",mins:390,pr:1,apps:["straeto","klappid","roadis"],why:"Går der den går. Sjekk road.is for stengte fjelloverganger før du stoler på rutetabellen.",cheap:1}
+    ]},
+
   barcelona:{ n:"Barcelona & storbyområdet", g:"Catalonia", c:"es", hub:"BCN El Prat", rail:"Barcelona Sants",
     local:["tmob","tmb","rodalies","fgc","cabify","cooltra"],
     localNote:"Metro, bybuss, FGC, sporvogn og Rodalies inne i sone 1 ligger under samme takst. Kjøp T-casual i T-mobilitat-appen eller på kort, så gjelder den på tvers av selskapene.",
@@ -530,6 +562,17 @@ const AREAS = {
 const O = (n,t,mins,pr,apps,why,flags) => Object.assign({n,t,mins,pr,apps,why},flags||{});
 
 const CORRIDORS = {
+  "akureyri|reykjavik":{book:["straeto","icelandair","roadis"],opts:[
+    O("Strætó rute 57 langs ringveien","6 t 30 min",390,1,["straeto","klappid","roadis"],"Hele veien nordover på vei. Sjekk føret over Holtavörðuheiði før du drar — bussen snur når passet stenger.",{gear:1}),
+    O("Innenriksfly fra Reykjavíkurflugvöllur","45 min",45,3,["icelandair"],"Går fra byflyplassen midt i Reykjavík, ikke fra Keflavík. Værforbehold hele vinteren.",{}),
+    O("Leiebil langs ringveien","5 t",300,3,["roadis"],"Den eneste måten å stoppe underveis på — og den eneste som ikke er prisgitt rutetabellen.",{})
+  ]},
+  "island|reykjavik":{book:["straeto","icelandair","roadis"],opts:[
+    O("Strætós landsbygdsruter","varierer",300,1,["straeto","klappid","roadis"],"Én til to avganger om dagen på de fleste strekningene, og flere går ikke om vinteren.",{}),
+    O("Innenriksfly fra byflyplassen","45 min",45,3,["icelandair"],"Til Akureyri, Egilsstaðir og Ísafjörður. Fra Reykjavíkurflugvöllur, ikke Keflavík.",{}),
+    O("Leiebil","varierer",270,3,["roadis"],"Ringveien er asfaltert hele veien rundt. Alt innenfor den krever mer bil og bedre vær.",{gear:1})
+  ]},
+
   "nesodden|oslo":{book:["ruter","entur"],opts:[
     O("Nesoddbåten til Aker brygge","22 min",22,1,["ruter"],"Går hvert kvarter i rushtiden og er en del av Ruter-nettet — samme billett som buss og T-bane, to soner.",{cheap:1,fast:1,gear:1}),
     O("Buss rundt fjorden via Vinterbro","1 t 15 min",75,1,["ruter","entur"],"Landeveien. Reservealternativet når båten står i is eller storm.",{})
@@ -616,6 +659,20 @@ const CORRIDORS = {
 };
 
 const FALLBACKS = {
+  "is|is":{book:["straeto","icelandair","roadis"],opts:[
+    O("Strætó der ruten går","varierer",330,1,["straeto","klappid","roadis"],"Island har aldri hatt jernbane. All landtransport går på vei, og rutenettet utenfor Reykjavík er tynt.",{cheap:1}),
+    O("Innenriksfly","45–60 min",50,3,["icelandair"],"Fra Reykjavíkurflugvöllur inne i byen. Kanselleres oftere enn du tror om vinteren.",{fast:1}),
+    O("Leiebil","varierer",300,3,["roadis"],"I praksis forutsetningen for alt utenfor ringveien.",{gear:1})
+  ]},
+  "is|no":{book:["skyscanner","icelandair","gflights"],opts:[
+    O("Icelandair til Keflavík","2 t 50 min",170,2,["icelandair","skyscanner"],"Oslo–Keflavík går året rundt med bagasje inkludert på de fleste billettypene. Fra de andre norske byene går det som regel via Oslo eller København.",{fast:1,gear:1}),
+    O("PLAY","2 t 50 min",170,1,["playair","skyscanner"],"Islandsk lavpris. Sjekk om ruta faktisk går i din sesong før du planlegger rundt den.",{cheap:1}),
+    O("Via København eller London","6–9 t",480,1,["skyscanner","gflights"],"Ofte billigere enn direkte utenom høysesong.",{})
+  ]},
+  "es|is":{book:["skyscanner","icelandair","gflights"],opts:[
+    O("Direktefly til Keflavík","4 t 30 min",270,2,["icelandair","playair","skyscanner"],"Både Icelandair og PLAY flyr Barcelona–Keflavík, men sesongavhengig. Fra Madrid og València går det som regel via en annen hub.",{fast:1,gear:1}),
+    O("Via København, Amsterdam eller London","8–11 t",600,1,["skyscanner","gflights"],"Nesten alltid billigere, og går året rundt.",{cheap:1})
+  ]},
   "no|no":{book:["entur","skyscanner","vy"],opts:[
     O("Tog og buss via Entur","varierer",300,1,["entur","vy","sj","goahead","norway"],"Entur setter sammen tog, buss, ferje og hurtigbåt i én reise og viser totalprisen — også når SJ eller Go-Ahead kjører strekningen i stedet for Vy.",{cheap:1,gear:1}),
     O("Innenriksfly","1–2 t",90,3,["norwegian","sas","wideroe","skyscanner"],"Widerøe dekker kortbanenettet der de store ikke går.",{fast:1})
@@ -626,7 +683,7 @@ const FALLBACKS = {
     O("BlaBlaCar","varierer",240,1,["blablacar"],"Reelt transportmiddel i Spania, ikke en nødløsning.",{})
   ]},
   "es|no":{book:["skyscanner","gflights","omio"],opts:[
-    O("Direktefly Oslo – Barcelona","3 t 20 min",200,2,["norwegian","vueling","sas","skyscanner"],"Norwegian og Vueling flyr strekningen daglig; SAS supplerer. Dette er standardvalget.",{fast:1,gear:1}),
+    O("Direktefly til Barcelona","3 t 20 min",200,2,["norwegian","vueling","sas","skyscanner"],"Norwegian og Vueling flyr Oslo–Barcelona daglig, SAS supplerer. Fra Bergen, Stavanger og Trondheim går det direkte i sesong, ellers via Oslo eller København.",{fast:1,gear:1}),
     O("Lavprisfly via Torp, Girona eller Reus","4–6 t inkl. transfer",330,1,["ryanair","skyscanner"],"Billettprisen er lav, men Torp ligger to timer fra Oslo og Girona en time fra Barcelona.",{cheap:1}),
     O("Mellomlanding i København, Amsterdam eller Frankfurt","6–9 t",480,1,["skyscanner","gflights","sas"],"Ofte billigere enn direkte, og med bagasje inkludert.",{}),
     O("Tog gjennom Europa","2–3 døgn",3000,3,["interrail","trainline","omio"],"Oslo–København–Hamburg–Paris–Barcelona. Et valg man tar av lyst eller klimahensyn, ikke for pris.",{})
@@ -722,6 +779,27 @@ const PLACES = {
     hist:"Glassverket ble grunnlagt i 1762 og er en av Norges eldste bedrifter i drift. Kistefos holder til i tresliperiet fra 1889.",
     ev:"Kistefos har sesong fra mai til oktober. Glassverket arrangerer julemarked gjennom desember."},
 
+  reykjavik:{n:"Reykjavík",k:"endepunkt",
+    se:"Hallgrímskirkja over byen, Harpa nede ved havna, og de gamle trehusene i Þingholt.",
+    hist:"Alltinget ble grunnlagt i 930 og regnes som verdens eldste fungerende nasjonalforsamling. Det flyttet til Reykjavík i 1845, etter nesten femti år uten møter.",
+    ev:"Þjóðhátíðardagurinn 17. juni, Menningarnótt i august og Iceland Airwaves i november."},
+  thingvellir:{n:"Þingvellir",k:"en time fra Reykjavík",
+    se:"Riftdalen der den nordamerikanske og den eurasiske platen glir fra hverandre.",
+    hist:"Alltinget møttes her fra 930 til 1798. På samme sted ble republikken Island erklært 17. juni 1944."},
+  borgarnes:{n:"Borgarnes",k:"underveis",
+    se:"Landnámssetur Íslands, museet om landnåmet og Egils saga, i det gamle pakkhuset ved fjorden.",
+    hist:"Egil Skallagrimsson holdt til på Borg like utenfor. Sagaen om ham ble skrevet ned på 1200-tallet og er en av de mest leste islendingesagaene."},
+  holtavorduheidi:{n:"Holtavörðuheiði",k:"underveis",
+    se:"Høyfjellsovergangen mellom sør og nord, 400 meter over havet og uten et hus å se.",
+    hist:"Passet var den store hindringen på ferden nordover lenge før veien kom. Det stenges fortsatt i uvær — og da snur bussen."},
+  akureyri:{n:"Akureyri",k:"endepunkt",
+    se:"Akureyrarkirkja på trappene over sentrum, den botaniske hagen, og hvalsafari ut Eyjafjörður.",
+    hist:"Byen vokste fram som dansk handelsstasjon på 1700-tallet og er blitt Nord-Islands sentrum.",
+    ev:"Skisesongen i Hlíðarfjall varer fra januar til april."},
+  vestmannaeyjar:{n:"Vestmannaeyjar og ringveien",k:"endepunkt",
+    se:"Jökulsárlón, Mývatn og Heimaey — ferja Herjólfur går fra Landeyjahöfn.",
+    hist:"Vulkanutbruddet på Heimaey i januar 1973 begravde en tredel av byen. Hele befolkningen ble evakuert på fiskebåter i løpet av natten, og nesten alle kom tilbake.",
+    ev:"Þjóðhátíð på Vestmannaeyjar den første helgen i august."},
   bergen:{n:"Bergen",k:"endepunkt",
     se:"Bryggen, Fløibanen og KODE-museene rundt Lille Lungegårdsvann.",
     hist:"Hanseatene hadde kontor på Bryggen fra 1360. Husene som står i dag er gjenreist etter bybrannen i 1702.",
@@ -778,6 +856,7 @@ const AREA_PLACES = {
   oslo:["oslosentrum"], nesodden:["nesoddtangen"], moss:["moss"],
   horten:["horten","borre","aasgaardstrand"], hadeland:["granavollen","jevnaker"],
   eidsvoll:["eidsvoll"], kongsberg:["kongsberg"],
+  reykjavik:["reykjavik","thingvellir"], akureyri:["akureyri"], island:["vestmannaeyjar","thingvellir"],
   bergen:["bergen"], stavanger:["stavanger"], trondheim:["trondheim"], tromso:["tromso"],
   barcelona:["barcelona"], girona:["girona"], tarragona:["tarragona"],
   pirineus:["lleida"], madrid:["madrid"], valencia:["valencia"]
@@ -791,6 +870,7 @@ const WAYPOINTS = {
   "kongsberg|oslo":{dir:"kongsberg",p:["vestfossen","drammen"]},
   "horten|moss":{dir:"horten",p:["bastoy"]},
   "eidsvoll|kongsberg":{dir:"eidsvoll",p:["gardermoen","lillestrom","oslosentrum","drammen","vestfossen"]},
+  "akureyri|reykjavik":{dir:"reykjavik",p:["borgarnes","holtavorduheidi"]},
   "barcelona|tarragona":{dir:"barcelona",p:["sitges"]},
   "barcelona|madrid":{dir:"barcelona",p:["lleida","zaragoza"]},
   "barcelona|pirineus":{dir:"barcelona",p:["lleida"]}
@@ -807,6 +887,7 @@ const CALENDAR = [
   [5,"Festspillene i Bergen","Bergen"],
   [5,"San Isidro","Madrid"],
   [6,"Musikkfest Oslo, 1. juni","Oslo"],
+  [6,"Þjóðhátíðardagurinn, 17. juni","Reykjavík"],
   [6,"Primavera Sound og Sónar","Barcelona"],
   [6,"Bergenfest","Bergen"],
   [6,"Momentum-biennalen, annethvert år","Moss"],
@@ -815,9 +896,12 @@ const CALENDAR = [
   [7,"Olavsfest","Trondheim"],
   [8,"Øyafestivalen og Oslo Jazzfestival","Oslo"],
   [8,"Festes de Gràcia","Barcelona"],
+  [8,"Menningarnótt","Reykjavík"],
+  [8,"Þjóðhátíð, første helg","Vestmannaeyjar"],
   [9,"La Mercè, rundt 24. september","Barcelona"],
   [9,"Santa Tecla med castells","Tarragona"],
   [10,"Sitges filmfestival","Sitges"],
+  [11,"Iceland Airwaves","Reykjavík"],
   [12,"Julemarked på Hadeland Glassverk","Jevnaker"],
   [12,"Skisesongen åpner i La Molina","Pyreneene"]
 ];
@@ -825,7 +909,7 @@ const MONTHS = ["","Januar","Februar","Mars","April","Mai","Juni","Juli","August
 </script>
 <script>
 /* --------------------------------------------------------------- */
-const FLIGHT = new Set(["norwegian","sas","wideroe","vueling","ryanair"]);
+const FLIGHT = new Set(["norwegian","sas","wideroe","vueling","ryanair","icelandair","playair"]);
 const BAND = ["","€","€€","€€€","€€€€"];
 const PRI_LABEL = {cheap:"billigst",balanced:"balansert",fast:"raskest"};
 const BAG_LABEL = {hand:"håndbagasje",hold:"koffert",gear:"utstyr og instrumenter"};
@@ -1001,6 +1085,9 @@ const REF_OUT = {
   hadeland:"Gjøvikbanen sørover til Oslo og nordover til Gjøvik, Innlandstrafikk-buss i dalføret",
   eidsvoll:"Lokaltog til Oslo lufthavn på tolv minutter, videre sørover gjennom Oslo til Drammen og Kongsberg",
   kongsberg:"Sørlandsbanen mot Oslo og videre sørvestover med Go-Ahead, Brakar-buss til Drammen",
+  reykjavik:"Strætós landsbygdsruter langs ringveien, innenriksfly fra byflyplassen, Icelandair og PLAY ut av Keflavík",
+  akureyri:"Strætó rute 57 sørover, innenriksfly til Reykjavík, ferje til Grímsey",
+  island:"Ringveien med leiebil, Strætó der rutene går, Herjólfur til Vestmannaeyjar",
   oslo:"Vy og Entur til hele Sør-Norge, NOR-WAY ekspressbuss, direktefly til det meste av Europa",
   bergen:"Bergensbanen, Kystbussen til Stavanger, direktefly til nordiske hovedsteder",
   stavanger:"Sørlandsbanen, Kystbussen, tett flytilbud til Oslo og Nordsjøen",
@@ -1055,6 +1142,10 @@ function buildCal(){
 
 /* ---- fallgruver ---- */
 const TRAPS = [
+  ["Island","Det finnes ingen jernbane","Island har aldri hatt et offentlig jernbanenett. All landtransport går på vei — buss, leiebil eller innenriksfly. Det er ingen togapp å lete etter."],
+  ["Island","Innenriksflyene går ikke fra Keflavík","Til Akureyri, Egilsstaðir og Ísafjörður flyr du fra Reykjavíkurflugvöllur inne i byen, 45 minutter fra den internasjonale flyplassen. Legg overgangen inn i reisetiden."],
+  ["Island","Strætó er kartet, Klappið er billetten","Strætó-appen planlegger reisen og viser sanntid, men billetten kjøper du i Klappið. Bussene tar ikke kort, og sjåføren veksler ikke."],
+  ["Island","Rutetabellen krymper om vinteren","Strætós landsbygdsruter har få avganger, og flere går ikke i vinterhalvåret. Sjekk road.is og safetravel.is for stengte fjelloverganger før du stoler på tabellen."],
   ["Fylkesgrensa","Fylkesbilletten stopper der fylket slutter","ØstfoldBillett, VKT, Innlandstrafikk og Brakar gjelder bussene i sitt eget fylke. Skal du videre inn i Oslo, kommer toget eller Ruter-sonen i tillegg — eller du kjøper hele reisen i Entur og slipper å tenke på grensa."],
   ["Nesodden og Eidsvoll","Ruter-billetten gjelder på toget","Innenfor Ruters soner er Vy-toget en del av Ruter-nettet. Kjøper du Vy-billett i tillegg, betaler du to ganger for samme tur."],
   ["Hadeland","Jevnaker ligger i et annet billettsystem","Gran og Lunner er Innlandet og dekkes av Innlandstrafikk. Jevnaker hører geografisk til Hadeland, men ligger i Buskerud — der er det Brakar som gjelder."],
