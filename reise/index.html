@@ -205,6 +205,26 @@ td em{font-style:normal;color:var(--ink-2)}
 .trap p{margin:0;font-size:14.5px;color:var(--ink-2)}
 .trap .where{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:10.5px;letter-spacing:.11em;text-transform:uppercase;color:var(--ink-3)}
 
+/* ---- steder underveis ---- */
+.places{display:grid;grid-template-columns:repeat(auto-fit,minmax(298px,1fr));gap:0 34px}
+.place{padding:15px 0 17px;border-top:1px solid var(--line)}
+.place h4{font-family:"Familjen Grotesk",sans-serif;font-size:17px;font-weight:600;margin:0 0 9px}
+.place h4 span{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:11px;letter-spacing:.08em;color:var(--ink-3);font-weight:400;margin-left:8px}
+.place dl{margin:0;display:grid;gap:8px}
+.place dl>div{display:grid;grid-template-columns:66px minmax(0,1fr);gap:12px}
+.place dt{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);padding-top:3px}
+.place dd{margin:0;font-size:14.5px;color:var(--ink-2);line-height:1.5}
+.place dd.ev{color:var(--cheap)}
+@media (max-width:560px){.place dl>div{grid-template-columns:1fr;gap:2px}.place dt{padding-top:0}}
+
+/* ---- årshjul ---- */
+.cal{display:grid;grid-template-columns:repeat(auto-fit,minmax(212px,1fr));gap:22px 28px}
+.month{border-top:2px solid var(--accent);padding-top:11px}
+.month h3{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:11.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--accent);font-weight:600}
+.month ul{margin:10px 0 0;padding:0;list-style:none;display:grid;gap:9px}
+.month li{font-size:14.5px;line-height:1.4}
+.month li span{display:block;font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:11.5px;letter-spacing:.05em;color:var(--ink-3)}
+
 footer{border-top:1px solid var(--line);margin-top:46px;padding:26px 0 44px;color:var(--ink-3);font-size:13.5px}
 footer p{margin:0 0 6px;max-width:70ch}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
@@ -280,6 +300,12 @@ footer p{margin:0 0 6px;max-width:70ch}
     </div>
   </section>
 
+  <section class="ref">
+    <h2>Året rundt langs strekningene</h2>
+    <p class="intro">Faste arrangementer i områdene planleggeren dekker, sortert etter når på året de går. Datoene flytter seg fra år til år — sjekk arrangørens egne sider før du legger reisen etter dem.</p>
+    <div class="cal" id="cal"></div>
+  </section>
+
   <section class="traps">
     <h2>Fallgruvene som koster deg penger eller tid</h2>
     <div class="trapgrid" id="traps"></div>
@@ -287,6 +313,7 @@ footer p{margin:0 0 6px;max-width:70ch}
 
   <footer>
     <p>Rutetider, priser og appdekning endrer seg. Sjekk alltid siste avgang og gjeldende takst i appen før du kjøper — særlig for nattbuss, ferje og sesongruter på Costa Brava og i Pyreneene.</p>
+    <p>Severdigheter, historikk og arrangementer er skrevet ned fra hukommelsen, ikke hentet fra en kilde. Årstall og datoer bør etterprøves før du planlegger en reise rundt dem.</p>
     <p>Sist gjennomgått september 2026.</p>
   </footer>
 </div>
@@ -621,6 +648,182 @@ function corridor(a,b){
 }
 </script>
 <script>
+/* ---------------------------------------------------------------
+   Steder. se = severdighet, hist = hva som har skjedd her,
+   ev = faste arrangementer.
+--------------------------------------------------------------- */
+const PLACES = {
+  oslosentrum:{n:"Oslo sentrum",k:"endepunkt",
+    se:"Operaen, Munchmuseet og Nasjonalmuseet ligger innenfor en kilometer fra Oslo S.",
+    hist:"Christian IV la byen om under Akershus festning etter brannen i 1624 og kalte den Christiania. Navnet Oslo kom tilbake i 1925.",
+    ev:"Musikkfest Oslo 1. juni, Øyafestivalen i Tøyenparken og Oslo Jazzfestival i august."},
+  indrefjord:{n:"Indre Oslofjord",k:"passeres med båt",
+    se:"Dyna fyr midt i innseilingen, og Bygdøy med Fram-museet og Kon-Tiki på styrbord side inn mot byen.",
+    hist:"Osebergskipet ble gravd ut i 1904, Gokstadskipet i 1880. Begge har ligget på Bygdøy siden — Vikingskipshuset er nå stengt mens Museet for vikingtid bygges."},
+  nesoddtangen:{n:"Nesodden",k:"endepunkt",
+    se:"Kyststien rundt halvøya og Hellviktangen, gammel storgård med badeplass og kafé ut mot fjorden.",
+    hist:"Nesodden kirke fra 1100-tallet er fortsatt i bruk. Rett sør for halvøya, i Drøbaksundet, senket kanonene på Oscarsborg krysseren Blücher om morgenen 9. april 1940 og forsinket angrepet på Oslo med et døgn.",
+    ev:"Kunstnerkolonien på Nesodden holder åpne atelierer flere helger i året."},
+  aas:{n:"Ås",k:"underveis",
+    se:"Parken og drivhusene på NMBU-campus, åpne for allmennheten.",
+    hist:"Den høiere Landbrugsskole ble lagt hit i 1859 og er kjernen i dagens universitet — Norges eldste høyere landbruksutdanning."},
+  follobanen:{n:"Blixtunnelen",k:"underveis",
+    se:"Du merker den som tjue kilometer sammenhengende mørke mellom Ski og Oslo.",
+    hist:"Follobanens tunnel åpnet i desember 2022 som Nordens lengste jernbanetunnel, ble stengt etter få dager på grunn av en kabelfeil, og kom i ordinær drift igjen våren 2023."},
+  moss:{n:"Moss",k:"endepunkt",
+    se:"Møllebyen langs Mossefossen med by- og industrimuseet, og Galleri F 15 i herregården på Jeløy.",
+    hist:"Mossekonvensjonen ble undertegnet i Moss 14. august 1814. Den avsluttet krigen mot Sverige: Norge beholdt Grunnloven fra Eidsvoll, men gikk inn i union.",
+    ev:"Momentum, den nordiske biennalen for samtidskunst, vises på Jeløy annethvert år."},
+  bastoy:{n:"Bastøy og Oslofjorden",k:"passeres med ferje",
+    se:"Overfarten går tett forbi Bastøy, med Jeløy i øst og Borrestranda i vest.",
+    hist:"Bastøy skolehjem for gutter lå på øya fra 1900 til 1970 og er kjent for opprøret i 1915. I dag er øya fengsel.",
+    ev:"Bastø Fosen kjører store deler av døgnet — et av Europas mest trafikkerte ferjesamband."},
+  horten:{n:"Horten",k:"endepunkt",
+    se:"Karljohansvern med Marinemuseet og Preus museum, det nasjonale fotomuseet, i det gamle magasinbygget.",
+    hist:"Byen vokste fram rundt marinens hovedstasjon fra 1818 og var i over hundre år Norges viktigste orlogsby."},
+  borre:{n:"Borre",k:"like utenfor Horten",
+    se:"Borreparken og Midgard vikingsenter, fem minutter nord for byen.",
+    hist:"Borrehaugene er Nord-Europas største samling monumentale gravhauger fra jernalder og vikingtid. Området ble fredet i 1932."},
+  aasgaardstrand:{n:"Åsgårdstrand",k:"like utenfor Horten",
+    se:"Munchs hus, sommerhuset han kjøpte i 1898, med hagen ned mot stranda.",
+    hist:"Edvard Munch malte «Pikene på broen» og flere av sommerbildene her. Huset står omtrent slik han forlot det."},
+  holmestrand:{n:"Holmestrand",k:"underveis",
+    se:"Stasjonen ligger inne i fjellet, med heis opp til platået over byen.",
+    hist:"Holmestrand fikk kjøpstadsrettigheter i 1752 på trelasthandel. Fjellstasjonen åpnet i 2016 og er sprengt inn i Holmestrandfjellet."},
+  drammen:{n:"Drammen",k:"underveis",
+    se:"Elvepromenaden langs Drammenselva og Spiralen, veitunnelen som skrur seg opp gjennom Bragernesåsen til utsikten.",
+    hist:"Spiralen ble sprengt ut som seks vindinger i fjellet og åpnet i 1961. Byen levde av trelast og skipsfart lenge før den ble kjent for elva."},
+  vestfossen:{n:"Vestfossen",k:"underveis",
+    se:"Vestfossen Kunstlaboratorium i den gamle fabrikkbygningen ved fossen.",
+    hist:"Fossen drev sagbruk og cellulosefabrikk og gjorde stedet til et av de tidligste industristedene på Østlandet.",
+    ev:"Utstillingssesongen går fra mai til september."},
+  kongsberg:{n:"Kongsberg",k:"endepunkt",
+    se:"Sølvgruvene i Saggrenda, med gruvetog inn i Kongens gruve, og Kongsberg kirke — den største barokkirken i landet.",
+    hist:"Sølv ble funnet i 1623, og Christian IV grunnla byen året etter. På 1700-tallet var Kongsberg Norges nest største by, drevet av Sølvverket.",
+    ev:"Kongsberg Jazzfestival, arrangert siden 1965, går over fire dager i begynnelsen av juli."},
+  lillestrom:{n:"Lillestrøm",k:"underveis",
+    se:"Nitelva og kultursenteret ved stasjonen.",
+    hist:"Byen vokste fram rundt sagbrukene der Nitelva renner ut i Øyeren, og var et av landets største trelaststeder på 1800-tallet."},
+  gardermoen:{n:"Gardermoen",k:"underveis",
+    hist:"Gardermoen var militær ekserserplass fra 1740-årene, og navnet kommer fra gården Garder. Hovedflyplassen åpnet i 1998 og flyttet all trafikk fra Fornebu på én natt."},
+  eidsvoll:{n:"Eidsvoll Verk",k:"endepunkt",
+    se:"Eidsvollsbygningen, ført tilbake til slik den sto våren 1814, og Wergelands Eidsvoll like ved.",
+    hist:"Riksforsamlingen møttes her fra 10. april til 20. mai 1814 og undertegnet Grunnloven 17. mai. Hovedbanen mellom Christiania og Eidsvoll åpnet i 1854 og var Norges første jernbane — den samme traseen du sitter på.",
+    ev:"17. mai markeres på Eidsvollsbygningen med egen seremoni."},
+  harestua:{n:"Harestua",k:"underveis",
+    se:"Solobservatoriet, med planetarium og overnatting i stjernehytter i åsen over stasjonen.",
+    hist:"Observatoriet ble bygget i 1954 for å studere sola og er Nord-Europas største av sitt slag."},
+  granavollen:{n:"Granavollen",k:"endepunkt",
+    se:"Søsterkirkene — to steinkirker fra 1100-tallet som står side om side på samme kirkegård.",
+    hist:"Ingen vet sikkert hvorfor to kirker ble reist så tett. Sagnet om de to søstrene som ikke kunne enes, er nettopp et sagn.",
+    ev:"Pilegrimsleden mot Nidaros går forbi Granavollen."},
+  jevnaker:{n:"Jevnaker",k:"i Hadeland, men Buskerud",
+    se:"Kistefos med skulpturparken og The Twist, og Hadeland Glassverk med glassblåserne i arbeid.",
+    hist:"Glassverket ble grunnlagt i 1762 og er en av Norges eldste bedrifter i drift. Kistefos holder til i tresliperiet fra 1889.",
+    ev:"Kistefos har sesong fra mai til oktober. Glassverket arrangerer julemarked gjennom desember."},
+
+  bergen:{n:"Bergen",k:"endepunkt",
+    se:"Bryggen, Fløibanen og KODE-museene rundt Lille Lungegårdsvann.",
+    hist:"Hanseatene hadde kontor på Bryggen fra 1360. Husene som står i dag er gjenreist etter bybrannen i 1702.",
+    ev:"Festspillene i Bergen i mai og juni, Bergenfest i juni."},
+  stavanger:{n:"Stavanger",k:"endepunkt",
+    se:"Gamle Stavanger med trehusbebyggelsen, Norsk oljemuseum og Preikestolen en dagstur unna.",
+    hist:"Slaget i Hafrsfjord rundt år 872 regnes tradisjonelt som samlingen av Norge. Sverd i fjell står i fjæra der.",
+    ev:"Gladmat i juli."},
+  trondheim:{n:"Trondheim",k:"endepunkt",
+    se:"Nidarosdomen, Bakklandet og Kristiansten festning over byen.",
+    hist:"Nidarosdomen er reist over Olav den helliges grav og var pilegrimsmål gjennom hele middelalderen.",
+    ev:"Olavsfest i slutten av juli."},
+  tromso:{n:"Tromsø",k:"endepunkt",
+    se:"Polarmuseet, Fjellheisen og Ishavskatedralen.",
+    hist:"Byen var utgangspunkt for Nansens og Amundsens ekspedisjoner. Slagskipet Tirpitz ble senket utenfor Håkøya i november 1944.",
+    ev:"Tromsø internasjonale filmfestival i januar og Nordlysfestivalen i februar. Nordlyssesongen varer fra september til mars."},
+
+  barcelona:{n:"Barcelona",k:"endepunkt",
+    se:"Sagrada Família og Hospital de Sant Pau — og Poble-sec og Sant Antoni når du vil unna køene.",
+    hist:"Byen var republikansk hovedsete under borgerkrigen. Kulehullene etter bombingen i 1938 står fortsatt i veggene rundt Plaça de Sant Felip Neri.",
+    ev:"Sant Jordi 23. april, Primavera Sound og Sónar i mai og juni, Festes de Gràcia i august, La Mercè rundt 24. september."},
+  sitges:{n:"Sitges",k:"underveis",
+    se:"Strandpromenaden og Museu Cau Ferrat i kunstnerhuset ved kirken.",
+    hist:"Stedet var kunstnerkoloni rundt Santiago Rusiñol fra 1890-årene og har vært fristed for Barcelonas kunstmiljø siden.",
+    ev:"Sitges filmfestival i oktober, en av verdens største for fantasy og skrekk."},
+  zaragoza:{n:"Zaragoza",k:"underveis",
+    se:"Basílica del Pilar speiler seg i Ebro rett ved høyhastighetsstasjonen.",
+    hist:"Byen ble beleiret to ganger under uavhengighetskrigen i 1808 og 1809. Motstanden er blitt nasjonal myte i Spania."},
+  girona:{n:"Girona",k:"endepunkt",
+    se:"Bymuren, det jødiske kvarteret Call og de malte husene langs Onyar.",
+    hist:"Girona har et av Europas best bevarte jødiske kvarterer. Menigheten ble drevet ut i 1492.",
+    ev:"Temps de Flors fyller gamlebyen med blomsterinstallasjoner i mai."},
+  tarragona:{n:"Tarragona",k:"endepunkt",
+    se:"Det romerske amfiteateret rett over stranda, og akvedukten Pont del Diable utenfor byen.",
+    hist:"Tarraco var hovedstad i den romerske provinsen Hispania Citerior. Ruinene står på UNESCOs verdensarvliste.",
+    ev:"Santa Tecla i september, med castells — menneskelige tårn — på Plaça de la Font."},
+  lleida:{n:"Lleida og Pyreneene",k:"endepunkt",
+    se:"La Seu Vella, den gamle katedralen på høyden over byen.",
+    hist:"Katedralen ble gjort om til brakke etter 1707 og lå innenfor militært område i over 200 år.",
+    ev:"Skisesongen i La Molina og Vall de Núria fra desember til april."},
+  madrid:{n:"Madrid",k:"endepunkt",
+    se:"Prado, Reina Sofía med Guernica, og Retiro når museene blir for mye.",
+    hist:"Guernica hang i New York til 1981 og kom først til Madrid etter Francos død, slik Picasso hadde satt som betingelse.",
+    ev:"San Isidro i mai."},
+  valencia:{n:"València",k:"endepunkt",
+    se:"Ciutat de les Arts, Mercat Central og elveleiet som er blitt ni kilometer sammenhengende park.",
+    hist:"Etter storflommen i 1957 ble Túria lagt utenom byen. Det tomme elveleiet gjennom sentrum ble park i stedet for motorvei.",
+    ev:"Les Falles i mars."}
+};
+
+/* Steder knyttet til område og til strekning. dir sier hvilken vei
+   lista er sortert; motsatt retning snus den. */
+const AREA_PLACES = {
+  oslo:["oslosentrum"], nesodden:["nesoddtangen"], moss:["moss"],
+  horten:["horten","borre","aasgaardstrand"], hadeland:["granavollen","jevnaker"],
+  eidsvoll:["eidsvoll"], kongsberg:["kongsberg"],
+  bergen:["bergen"], stavanger:["stavanger"], trondheim:["trondheim"], tromso:["tromso"],
+  barcelona:["barcelona"], girona:["girona"], tarragona:["tarragona"],
+  pirineus:["lleida"], madrid:["madrid"], valencia:["valencia"]
+};
+const WAYPOINTS = {
+  "nesodden|oslo":{dir:"nesodden",p:["indrefjord"]},
+  "moss|oslo":{dir:"moss",p:["aas","follobanen"]},
+  "horten|oslo":{dir:"horten",p:["holmestrand","drammen"]},
+  "hadeland|oslo":{dir:"hadeland",p:["harestua"]},
+  "eidsvoll|oslo":{dir:"eidsvoll",p:["gardermoen","lillestrom"]},
+  "kongsberg|oslo":{dir:"kongsberg",p:["vestfossen","drammen"]},
+  "horten|moss":{dir:"horten",p:["bastoy"]},
+  "eidsvoll|kongsberg":{dir:"eidsvoll",p:["gardermoen","lillestrom","oslosentrum","drammen","vestfossen"]},
+  "barcelona|tarragona":{dir:"barcelona",p:["sitges"]},
+  "barcelona|madrid":{dir:"barcelona",p:["lleida","zaragoza"]},
+  "barcelona|pirineus":{dir:"barcelona",p:["lleida"]}
+};
+
+const CALENDAR = [
+  [1,"Tromsø internasjonale filmfestival","Tromsø"],
+  [2,"Nordlysfestivalen","Tromsø"],
+  [3,"Les Falles","València"],
+  [4,"Sant Jordi, 23. april","Barcelona"],
+  [5,"17. mai på Eidsvollsbygningen","Eidsvoll Verk"],
+  [5,"Temps de Flors","Girona"],
+  [5,"Kistefos åpner sesongen","Jevnaker"],
+  [5,"Festspillene i Bergen","Bergen"],
+  [5,"San Isidro","Madrid"],
+  [6,"Musikkfest Oslo, 1. juni","Oslo"],
+  [6,"Primavera Sound og Sónar","Barcelona"],
+  [6,"Bergenfest","Bergen"],
+  [6,"Momentum-biennalen, annethvert år","Moss"],
+  [7,"Kongsberg Jazzfestival","Kongsberg"],
+  [7,"Gladmat","Stavanger"],
+  [7,"Olavsfest","Trondheim"],
+  [8,"Øyafestivalen og Oslo Jazzfestival","Oslo"],
+  [8,"Festes de Gràcia","Barcelona"],
+  [9,"La Mercè, rundt 24. september","Barcelona"],
+  [9,"Santa Tecla med castells","Tarragona"],
+  [10,"Sitges filmfestival","Sitges"],
+  [12,"Julemarked på Hadeland Glassverk","Jevnaker"],
+  [12,"Skisesongen åpner i La Molina","Pyreneene"]
+];
+const MONTHS = ["","Januar","Februar","Mars","April","Mai","Juni","Juli","August","September","Oktober","November","Desember"];
+</script>
+<script>
 /* --------------------------------------------------------------- */
 const FLIGHT = new Set(["norwegian","sas","wideroe","vueling","ryanair"]);
 const BAND = ["","€","€€","€€€","€€€€"];
@@ -662,11 +865,18 @@ function gearNote(o){
   return null;
 }
 
-function optCard(o,isRec){
+/* Billigst og raskest leses ut av tallene, ikke av håndsatte flagg —
+   da kan merket aldri motsi rekkefølgen planleggeren viser. */
+function extremes(opts){
+  const cheap = opts.reduce((a,b)=> (b.pr<a.pr || (b.pr===a.pr && b.mins<a.mins)) ? b : a);
+  const fast  = opts.reduce((a,b)=> (b.mins<a.mins || (b.mins===a.mins && b.pr<a.pr)) ? b : a);
+  return {cheap:cheap, fast:fast};
+}
+function optCard(o,isRec,ex){
   const tags = [];
   if(isRec) tags.push('<span class="tag rec">Anbefalt</span>');
-  if(o.cheap) tags.push('<span class="tag cheap">Billigst</span>');
-  if(o.fast) tags.push('<span class="tag fast">Raskest</span>');
+  if(ex && o===ex.cheap) tags.push('<span class="tag cheap">Billigst</span>');
+  if(ex && o===ex.fast)  tags.push('<span class="tag fast">Raskest</span>');
   const g = gearNote(o);
   return '<article class="opt'+(isRec?" rec":"")+'">'
     + '<div class="opt-top"><span class="opt-name">'+esc(o.n)+'</span>'+tags.join("")
@@ -677,26 +887,54 @@ function optCard(o,isRec){
     + '</article>';
 }
 
-function stage(num,title,sub,body,key){
-  return '<section class="stage'+(key?" key":"")+'">'
-    + '<div class="rail"><div class="dot">'+num+'</div><div class="line"></div></div>'
-    + '<div><h3>'+title+'</h3><p class="sub">'+sub+'</p>'+body+'</div></section>';
+function placeCard(id){
+  const p = PLACES[id]; if(!p) return "";
+  const rows = [];
+  if(p.se)   rows.push(["Se",p.se,""]);
+  if(p.hist) rows.push(["Historie",p.hist,""]);
+  if(p.ev)   rows.push(["Årlig",p.ev,"ev"]);
+  return '<article class="place"><h4>'+esc(p.n)+(p.k?'<span>'+esc(p.k)+'</span>':"")+'</h4><dl>'
+    + rows.map(r=>'<div><dt>'+r[0]+'</dt><dd'+(r[2]?' class="'+r[2]+'"':"")+'>'+esc(r[1])+'</dd></div>').join("")
+    + '</dl></article>';
+}
+function placesBlock(ids){
+  const list = ids.filter((id,i)=>PLACES[id] && ids.indexOf(id)===i);
+  return list.length ? '<div class="places">'+list.map(placeCard).join("")+'</div>' : "";
+}
+function waypoints(a,b){
+  const w = WAYPOINTS[[a,b].sort().join("|")];
+  if(!w) return [];
+  return w.dir===a ? w.p.slice() : w.p.slice().reverse();
+}
+
+function stage(title,sub,body,key){ return {title:title,sub:sub,body:body,key:!!key}; }
+function renderStages(list){
+  return '<div class="plan">' + list.filter(Boolean).map((st,i)=>
+    '<section class="stage'+(st.key?" key":"")+'">'
+    + '<div class="rail"><div class="dot">'+(i+1)+'</div><div class="line"></div></div>'
+    + '<div><h3>'+st.title+'</h3><p class="sub">'+st.sub+'</p>'+st.body+'</div></section>'
+  ).join("") + '</div>';
 }
 
 function render(){
   const from = AREAS[state.from], to = AREAS[state.to];
   const head = '<div class="route-head"><h2>'+esc(from.n)+(state.from===state.to?"":" → "+esc(to.n))+'</h2>'
     + '<span class="meta">prioritet: '+PRI_LABEL[state.pri]+' · bagasje: '+BAG_LABEL[state.bag]+'</span></div>';
+  const optList = function(arr){
+    const ex = extremes(arr);
+    return '<div class="opts">'+rank(arr,state.pri).map(function(o,i){return optCard(o,i===0,ex);}).join("")+'</div>';
+  };
+  const here = AREA_PLACES[state.from] || [];
 
   if(state.from===state.to){
-    const air = rank(from.air,state.pri);
-    const body = head + '<div class="plan">'
-      + stage(1,"Rundt i "+esc(from.n), esc(from.localNote), appChips(from.local), true)
-      + stage(2,"Til og fra "+esc(from.hub),
-          "Samme strekning, tre priser. Slik ser den ut når du prioriterer "+PRI_LABEL[state.pri]+".",
-          '<div class="opts">'+air.map((o,i)=>optCard(o,i===0)).join("")+'</div>')
-      + '</div>';
-    document.getElementById("result").innerHTML = body;
+    document.getElementById("result").innerHTML = head + renderStages([
+      stage("Rundt i "+esc(from.n), esc(from.localNote), appChips(from.local), true),
+      stage("Til og fra "+esc(from.hub),
+        "Samme strekning, flere priser. Slik ser den ut når du prioriterer "+PRI_LABEL[state.pri]+".",
+        optList(from.air)),
+      here.length ? stage("Verdt et stopp",
+        "Severdighetene, historien og de faste arrangementene i området.", placesBlock(here)) : null
+    ]);
     return;
   }
 
@@ -704,31 +942,30 @@ function render(){
   const opts = rank(cor.opts,state.pri);
   const rec = opts[0];
   const flying = rec.apps.some(a=>FLIGHT.has(a));
+  const via = here.concat(waypoints(state.from,state.to));
 
   const legOut = flying
-    ? {title:"Ut av "+esc(from.n)+" til "+esc(from.hub),
-       sub:"Den anbefalte hovedstrekningen går med fly, så første etappe er ut til flyplassen.",
-       body:'<div class="opts">'+rank(from.air,state.pri).map((o,i)=>optCard(o,i===0)).join("")+'</div>'}
-    : {title:"Fram til "+esc(from.rail),
-       sub:"Hovedstrekningen går på skinner eller vei fra sentrum, så du trenger bare lokaltransport dit.",
-       body:appChips(from.local)};
+    ? stage("Ut av "+esc(from.n)+" til "+esc(from.hub),
+        "Den anbefalte hovedstrekningen går med fly, så første etappe er ut til flyplassen.", optList(from.air))
+    : stage("Fram til "+esc(from.rail),
+        "Hovedstrekningen går på skinner eller vei fra sentrum, så du trenger bare lokaltransport dit.", appChips(from.local));
 
   const legIn = flying
-    ? {title:"Fra "+esc(to.hub)+" og inn i "+esc(to.n),
-       sub:"Etappen folk glemmer når de sammenligner flypriser — den kan koste mer enn en time og en god del penger.",
-       body:'<div class="opts">'+rank(to.air,state.pri).map((o,i)=>optCard(o,i===0)).join("")+'</div>'}
-    : {title:"Fra "+esc(to.rail)+" og videre",
-       sub:"Du kommer inn midt i byen. Herfra holder det med lokalappen.",
-       body:appChips(to.local)};
+    ? stage("Fra "+esc(to.hub)+" og inn i "+esc(to.n),
+        "Etappen folk glemmer når de sammenligner flypriser — den kan koste mer enn en time og en god del penger.", optList(to.air))
+    : stage("Fra "+esc(to.rail)+" og videre",
+        "Du kommer inn midt i byen. Herfra holder det med lokalappen.", appChips(to.local));
 
-  document.getElementById("result").innerHTML = head + '<div class="plan">'
-    + stage(1,"Søk opp og book","Start bredt, book smalt. Disse viser hele tilbudet på strekningen før du binder deg til ett selskap.",appChips(cor.book))
-    + stage(2,legOut.title,legOut.sub,legOut.body)
-    + stage(3,"Hovedstrekningen","Rangert etter prioriteten din. "+esc(rec.n)+" kommer først når du vil ha det "+PRI_LABEL[state.pri]+".",
-        '<div class="opts">'+opts.map((o,i)=>optCard(o,i===0)).join("")+'</div>', true)
-    + stage(4,legIn.title,legIn.sub,legIn.body)
-    + stage(5,"Rundt i "+esc(to.n),esc(to.localNote),appChips(to.local))
-    + '</div>';
+  document.getElementById("result").innerHTML = head + renderStages([
+    stage("Søk opp og book","Start bredt, book smalt. Disse viser hele tilbudet på strekningen før du binder deg til ett selskap.",appChips(cor.book)),
+    legOut,
+    stage("Hovedstrekningen","Rangert etter prioriteten din. "+esc(rec.n)+" kommer først når du vil ha det "+PRI_LABEL[state.pri]+".",optList(cor.opts),true),
+    via.length ? stage("Steder langs veien",
+      "Reisen begynner der du står og går gjennom disse stedene. Severdighet, det som har skjedd her, og hva som skjer årlig.",
+      placesBlock(via)) : null,
+    legIn,
+    stage("Framme i "+esc(to.n), esc(to.localNote), appChips(to.local) + placesBlock(AREA_PLACES[state.to]||[]))
+  ]);
 }
 
 /* ---- kontroller ---- */
@@ -805,6 +1042,17 @@ function buildBill(){
   ).join("");
 }
 
+/* ---- årshjul ---- */
+function buildCal(){
+  const by = {};
+  CALENDAR.forEach(function(e){ (by[e[0]] = by[e[0]] || []).push([e[1],e[2]]); });
+  document.getElementById("cal").innerHTML = Object.keys(by).map(Number).sort(function(a,b){return a-b;}).map(function(m){
+    return '<div class="month"><h3>'+MONTHS[m]+'</h3><ul>'
+      + by[m].map(function(x){ return '<li>'+esc(x[0])+'<span>'+esc(x[1])+'</span></li>'; }).join("")
+      + '</ul></div>';
+  }).join("");
+}
+
 /* ---- fallgruver ---- */
 const TRAPS = [
   ["Fylkesgrensa","Fylkesbilletten stopper der fylket slutter","ØstfoldBillett, VKT, Innlandstrafikk og Brakar gjelder bussene i sitt eget fylke. Skal du videre inn i Oslo, kommer toget eller Ruter-sonen i tillegg — eller du kjøper hele reisen i Entur og slipper å tenke på grensa."],
@@ -828,7 +1076,7 @@ function buildTraps(){
   ).join("");
 }
 
-buildSelects(); buildSeg("pri","pri"); buildSeg("bag","bag"); buildBill(); buildRef(); buildTraps(); render();
+buildSelects(); buildSeg("pri","pri"); buildSeg("bag","bag"); buildBill(); buildRef(); buildCal(); buildTraps(); render();
 </script>
 
 </body>
