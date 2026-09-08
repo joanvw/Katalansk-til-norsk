@@ -228,6 +228,16 @@ select.sub{padding:8px 30px 8px 10px;font-size:13.5px;color:var(--ink-2)}
   padding:7px 12px;font-size:13.5px;font-weight:700;white-space:nowrap;
 }
 .maplink:hover{background:var(--accent-soft)}
+.search{
+  background:var(--accent);color:var(--surface);border:0;border-radius:3px;
+  padding:13px 16px;font-family:"Familjen Grotesk","Helvetica Neue",Arial,sans-serif;
+  font-size:15.5px;font-weight:600;letter-spacing:.01em;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;gap:9px;
+}
+.search:hover{filter:brightness(1.12)}
+.search:active{filter:brightness(.94)}
+.search:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+.search span{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:13px;opacity:.75}
 .route-head{align-items:center}
 
 /* ---- steder underveis ---- */
@@ -303,6 +313,7 @@ footer p{margin:0 0 6px;max-width:70ch}
           <button type="button" data-v="gear">Utstyr</button>
         </div>
       </div>
+      <button type="submit" class="search" id="searchbtn">Finn reisen <span>↵</span></button>
       <p class="panel-note">Skriv en adresse, et stedsnavn, koordinater eller lim inn en Google Maps-lenke. Siden slår opp mot en innebygd stedsliste med 240 stedsnavn — den har ingen forbindelse til Googles tjenester.<span id="samplenote"></span> Knappen «Åpne i Google Maps» tar deg videre til faktiske avganger.</p>
       <p class="panel-note" style="border-top:0;padding-top:0">Prisnivå er vist som <b>€ / €€ / €€€</b> i stedet for kroner, fordi takstene endrer seg raskere enn en side som denne. Tidene er dør-til-dør-anslag for én etappe.</p>
     </form>
@@ -1310,6 +1321,7 @@ function setSide(side, area, note, raw, ll){
   render();
 }
 
+const COMMIT = {};
 function wireLocation(){
   ["from","to"].forEach(function(side){
     const input = document.getElementById(side+"q");
@@ -1348,12 +1360,14 @@ function wireLocation(){
       if(btn) btn.addEventListener("click", function(){ askClaude(side, q, res, btn); });
     }
 
+    COMMIT[side] = commit;
+
     input.addEventListener("input", function(){
       if(/^https?:/i.test(input.value) || parseCoords(input.value)){ closeList(); return; }
       openList(suggest(input.value));
     });
     input.addEventListener("keydown", function(e){
-      if(list.hidden){ if(e.key === "Enter"){ e.preventDefault(); commit(); } return; }
+      if(list.hidden){ if(e.key === "Enter"){ e.preventDefault(); doSearch(); } return; }
       if(e.key === "ArrowDown" || e.key === "ArrowUp"){
         e.preventDefault();
         cur = e.key === "ArrowDown" ? (cur + 1) % items.length
@@ -1361,7 +1375,7 @@ function wireLocation(){
         [].forEach.call(list.children, function(li,i){ li.classList.toggle("on", i === cur); });
       } else if(e.key === "Enter"){
         e.preventDefault();
-        if(cur > -1 && items[cur]) pick(items[cur]); else commit();
+        if(cur > -1 && items[cur]) pick(items[cur]); else doSearch();
       } else if(e.key === "Escape"){ closeList(); }
     });
     input.addEventListener("blur", function(){ setTimeout(function(){ if(!list.hidden) closeList(); }, 160); });
@@ -1383,6 +1397,9 @@ function wireLocation(){
     document.getElementById("fromq").value = state.raw.from || AREAS[state.from].n;
     document.getElementById("toq").value   = state.raw.to   || AREAS[state.to].n;
   });
+
+  document.getElementById("searchbtn").addEventListener("click", doSearch);
+  document.getElementById("panel").addEventListener("submit", function(e){ e.preventDefault(); doSearch(); });
 
   const geo = document.getElementById("geobtn");
   geo.addEventListener("click", function(){
@@ -1410,6 +1427,18 @@ function wireLocation(){
         : "Fikk ikke tak i posisjonen. Lim inn en Google Maps-lenke eller skriv stedsnavnet.";
     }, {timeout:9000, maximumAge:60000});
   });
+}
+
+/* Søkeknappen leser begge feltene i én operasjon, slik at et skjema
+   der bare det ene er endret ikke gir en halvt oppdatert reise. */
+function doSearch(){
+  if(COMMIT.from) COMMIT.from();
+  if(COMMIT.to)   COMMIT.to();
+  render();
+  if(window.matchMedia && window.matchMedia("(max-width:900px)").matches){
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    document.getElementById("result").scrollIntoView({behavior: reduce ? "auto" : "smooth", block:"start"});
+  }
 }
 
 function askClaude(side, q, res, btn){
