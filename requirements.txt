@@ -13,5 +13,15 @@
 #   anthropic>=0.40
 # Krever også ANTHROPIC_API_KEY (eller en aktiv `ant auth login`-profil).
 #
+# mediaskann bruker ffmpeg/ffprobe for lesing og klipping av mediefiler –
+# installeres via systemet (`apt install ffmpeg` / `brew install ffmpeg`),
+# ikke pip. Selve skanningen, segmenteringen, rapporten og uttrekket er ren
+# Python. Detektorene er valgfrie og importeres først når de opprettes:
+#   tensorflow>=2.13         # lyd: mennesker og dyr (YAMNet)
+#   tensorflow_hub>=0.14
+#   ultralytics>=8.0         # bilde: mennesker og dyr (YOLO)
+#   pillow>=10.0
+#   opencv-python>=4.8       # bilde: kun mennesker (--bildemodell hog)
+#
 # Utvikling/test:
 pytest>=7.0
