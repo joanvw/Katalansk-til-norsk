@@ -6,6 +6,32 @@ markører og **EQ-, kompressor-, gate- og effektinnstillingene** fra miksebordet
 
 Kun Pythons standardbibliotek (Python 3.10+). Ingen installasjon av pakker.
 
+## Kopiere via USB
+
+Behringer/Midas har ikke laget X-Live-kortet slik at SD-kortene vises som disk
+over USB-kabelen. Kortets USB-port er et 32×32 lydkort for opptak rett i DAW.
+Kopiering via USB gjøres derfor slik:
+
+1. Ta SD-kortet ut av X-Live-kortet og sett det i en **USB-kortleser**.
+2. Start appen. Den finner kortet automatisk på alle USB-disker, og leter også
+   etter scenefiler (`.scn`) på USB-pinnen fra miksebordets USB-port.
+3. **Kopier råfiler først** (på som standard i vinduet, `--kopier-raa` på
+   kommandolinjen): hele sesjonen kopieres urørt til `<målmappe>/Råfiler/`
+   som sikkerhetskopi før sporene lages. Da kan SD-kortet tas ut så snart
+   kopien er ferdig.
+   * Avbrutt kopiering kan bare startes på nytt: ferdige filer hoppes over.
+   * Hver fil skrives som `.del` og får riktig navn først når den er komplett
+     og har riktig størrelse. `--verifiser` sammenligner i tillegg byte for byte.
+
+```bash
+python -m xlive_eksport usb                          # hva er koblet til?
+python -m xlive_eksport kopier -o D:\Backup          # bare sikkerhetskopi
+python -m xlive_eksport eksporter -o D:\Opptak --scene auto --kopier-raa
+```
+
+Uten mappe letes det automatisk på USB. `--scene auto` bruker nyeste
+`.scn` på USB-pinnen.
+
 ## Kom i gang
 
 ```bash

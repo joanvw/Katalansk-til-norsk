@@ -15,6 +15,7 @@ def start() -> None:
     from .app import Valg, eksporter_alle
     from .eksport import parse_navnefil, parse_par, parse_tallsett as _tallsett
     from .sdkort import finn_sesjoner
+    from .usb import finn_scenefiler, finn_xlive_kort, usb_disker
 
     rot = tk.Tk()
     rot.title("X-Live eksport – X32 / M32")
@@ -33,6 +34,8 @@ def start() -> None:
     v_hopp = tk.StringVar()
     v_navn = tk.StringVar()
     v_stille = tk.BooleanVar(value=False)
+    v_kopier = tk.BooleanVar(value=True)
+    v_verifiser = tk.BooleanVar(value=False)
     sesjoner: list = []
     meldinger: queue.Queue = queue.Queue()
 
@@ -61,6 +64,9 @@ def start() -> None:
     ttk.Entry(ramme, textvariable=v_kort).grid(row=rad, column=1, sticky="ew", padx=6)
     ttk.Button(ramme, text="Velg …", command=mappevelger(v_kort, "Velg SD-kortet")).grid(row=rad, column=2)
     ttk.Button(ramme, text="Skann", command=lambda: skann()).grid(row=rad, column=3, padx=(6, 0))
+    rad += 1
+    ttk.Button(ramme, text="Finn kort på USB (kortleser)", command=lambda: finn_usb()).grid(
+        row=rad, column=1, sticky="w", padx=6, pady=(4, 0))
 
     rad += 1
     ttk.Label(ramme, text="Sesjoner (merk de du vil ha):").grid(row=rad, column=0, columnspan=4, sticky="w", pady=(10, 2))
@@ -104,6 +110,10 @@ def start() -> None:
     ttk.Entry(opp, textvariable=v_navn, width=24).grid(row=2, column=3, sticky="w", padx=6, pady=(6, 0))
     ttk.Button(opp, text="…", width=3, command=filvelger(v_navn, "Velg navnefil",
                [("Tekst/CSV", "*.txt *.csv"), ("Alle filer", "*")])).grid(row=2, column=4, pady=(6, 0))
+    ttk.Checkbutton(opp, text="Kopier råfiler fra kortet først (sikkerhetskopi)",
+                    variable=v_kopier).grid(row=3, column=0, columnspan=3, sticky="w", pady=(6, 0))
+    ttk.Checkbutton(opp, text="Verifiser kopien", variable=v_verifiser).grid(
+        row=3, column=3, sticky="w", pady=(6, 0))
 
     rad += 1
     fremdrift = ttk.Progressbar(ramme, maximum=1000)
@@ -119,16 +129,36 @@ def start() -> None:
     def logg(tekst: str) -> None:
         meldinger.put(("logg", tekst))
 
-    def skann() -> None:
+    def vis(nye) -> None:
         sesjoner.clear()
         liste.delete(0, "end")
-        if not v_kort.get():
-            return
-        sesjoner.extend(finn_sesjoner(v_kort.get()))
+        sesjoner.extend(nye)
         for s in sesjoner:
             liste.insert("end", s.beskrivelse())
         liste.select_set(0, "end")
         logg(f"Fant {len(sesjoner)} sesjon(er).")
+
+    def skann() -> None:
+        if v_kort.get():
+            vis(finn_sesjoner(v_kort.get()))
+
+    def finn_usb(stille: bool = False) -> None:
+        disker = usb_disker()
+        kort = finn_xlive_kort(disker)
+        if kort:
+            for disk, ss in kort:
+                logg(f"X-Live-kort på USB: {disk} – {len(ss)} sesjon(er)")
+            v_kort.set(kort[0][0].sti if len(kort) == 1 else "")
+            vis([s for _, ss in kort for s in ss])
+        elif not stille:
+            messagebox.showinfo("X-Live", "Fant ikke noe X-Live-kort på USB.\n\n"
+                                "Ta SD-kortet ut av X-Live-kortet og sett det i en USB-kortleser. "
+                                "(X-Live-kortets egen USB-port er et lydkort og viser ikke SD-kortet.)")
+        scener = finn_scenefiler(disker)
+        if scener and not v_scene.get():
+            v_scene.set(scener[0])
+            v_kilde.set("scene")
+            logg(f"Scenefil funnet på USB: {scener[0]}")
 
     def kjor() -> None:
         valgte = [sesjoner[i] for i in liste.curselection()]
@@ -144,7 +174,8 @@ def start() -> None:
                 auto_stereo=v_auto.get(), stereopar=parse_par(v_stereo.get()),
                 monospor=_tallsett(v_mono.get()), hopp_over=_tallsett(v_hopp.get()),
                 navn=parse_navnefil(v_navn.get()) if v_navn.get() else {},
-                fjern_stille=v_stille.get())
+                fjern_stille=v_stille.get(), kopier_raa=v_kopier.get(),
+                verifiser=v_verifiser.get())
         except (ValueError, OSError) as e:
             messagebox.showerror("X-Live", str(e))
             return
@@ -181,4 +212,5 @@ def start() -> None:
         rot.after(100, pump)
 
     pump()
+    rot.after(300, lambda: finn_usb(stille=True))
     rot.mainloop()

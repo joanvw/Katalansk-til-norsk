@@ -25,9 +25,19 @@ class Valg:
     navn: dict[int, str] = field(default_factory=dict)
     hopp_over: set[int] = field(default_factory=set)
     fjern_stille: bool = False
+    kopier_raa: bool = False        # kopier kortets råfiler til disk først
+    verifiser: bool = False         # sammenlign kopien byte for byte
 
 
 def last_scene(valg: Valg, logg: Callable[[str], None] = print) -> Scene | None:
+    if valg.scenefil == "auto":
+        from .usb import finn_scenefiler
+        filer = finn_scenefiler()
+        if not filer:
+            logg("Fant ingen scenefil (.scn) på USB-diskene – fortsetter uten.")
+            return None
+        logg(f"Bruker nyeste scenefil på USB: {filer[0]}")
+        return les_scene_fil(filer[0])
     if valg.scenefil:
         logg(f"Leser scene: {valg.scenefil}")
         return les_scene_fil(valg.scenefil)
@@ -36,6 +46,24 @@ def last_scene(valg: Valg, logg: Callable[[str], None] = print) -> Scene | None:
         linjer = hent_fra_miksebord(valg.miksebord_ip, logg=logg)
         return les_scene_tekst(linjer, kilde=f"miksebord {valg.miksebord_ip}")
     return None
+
+
+def kopier_raa(sesjon: Sesjon, valg: Valg, logg: Callable[[str], None] = print,
+               fremdrift: Callable[[float, str], None] | None = None,
+               nr: int = 1, antall: int = 1) -> Sesjon:
+    """Kopier sesjonens råfiler til ``<målmappe>/Råfiler`` og returnér kopien."""
+    from .usb import kopier_sesjon
+    mal = os.path.join(valg.utmappe, "Råfiler")
+    logg(f"   Kopierer råfiler til {os.path.join(mal, sesjon.id)} …")
+
+    def fr(ferdig: int, totalt: int, fil: str) -> None:
+        if fremdrift:
+            fremdrift(((nr - 1) + ferdig / max(totalt, 1)) / antall,
+                      f"kopierer {fil} ({ferdig / 1e9:.1f}/{totalt / 1e9:.1f} GB)")
+
+    kopi = kopier_sesjon(sesjon, mal, fr, valg.verifiser)
+    logg("   Råfiler kopiert" + (" og verifisert." if valg.verifiser else "."))
+    return kopi
 
 
 def sesjonsmappe(sesjon: Sesjon) -> str:
@@ -55,6 +83,8 @@ def eksporter_alle(
     resultat = []
     for nr, sesjon in enumerate(sesjoner, 1):
         logg(f"\n[{nr}/{len(sesjoner)}] {sesjon.beskrivelse()}")
+        if valg.kopier_raa:
+            sesjon = kopier_raa(sesjon, valg, logg, fremdrift, nr, len(sesjoner))
         planer = planlegg_spor(sesjon.kanaler, scene, valg.auto_stereo, valg.stereopar,
                                valg.monospor, valg.navn, valg.hopp_over)
         for p in planer:

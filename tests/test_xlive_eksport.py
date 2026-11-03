@@ -192,3 +192,44 @@ def test_rf64_header(tmp_path):
     with open(sti, "rb") as f:
         hode = f.read(64)
     assert hode[:4] == b"RF64" and hode[12:16] == b"ds64"
+
+
+# --------------------------------------------------------------------------
+# USB: finn kort/scener og kopier råfiler
+# --------------------------------------------------------------------------
+
+from xlive_eksport.__main__ import hoved  # noqa: E402
+from xlive_eksport.usb import Disk, finn_scenefiler, finn_xlive_kort, kopier_sesjon  # noqa: E402
+
+
+def test_finn_kort_og_scene_paa_usb(kort, tmp_path):
+    pinne = tmp_path / "PINNE"
+    pinne.mkdir()
+    (pinne / "Konsert.scn").write_text(SCENE, encoding="utf-8")
+    disker = [Disk(str(kort), "XLIVE", True), Disk(str(pinne), "PINNE", True)]
+    funnet = finn_xlive_kort(disker)
+    assert [d.navn for d, _ in funnet] == ["XLIVE"]
+    assert finn_scenefiler(disker) == [str(pinne / "Konsert.scn")]
+
+
+def test_kopier_sesjon_gjenopptar_og_verifiserer(kort, tmp_path):
+    (s,) = finn_sesjoner(str(kort))
+    mal = tmp_path / "backup"
+    hendelser = []
+    kopi = kopier_sesjon(s, str(mal), lambda f, t, n: hendelser.append(n), verifiser=True)
+    assert kopi.frames == s.frames and kopi.markorer == s.markorer
+    assert sorted(os.listdir(mal / s.id)) == ["00000001.WAV", "00000002.WAV", "SE_LOG.BIN"]
+    # Andre gang: alt finnes allerede og hoppes over.
+    hendelser.clear()
+    kopier_sesjon(s, str(mal), lambda f, t, n: hendelser.append(n))
+    assert all(n.endswith("(finnes)") for n in hendelser)
+
+
+def test_eksport_med_raakopi_og_cli(kort, tmp_path):
+    ut = tmp_path / "ut"
+    (s,) = finn_sesjoner(str(kort))
+    ((kopi, mappe, _),) = eksporter_alle([s], Valg(str(ut), kopier_raa=True), logg=lambda *_: None)
+    assert kopi.mappe.startswith(str(ut / "Råfiler"))
+    assert os.path.exists(os.path.join(mappe, "01 Spor 01.wav"))
+    assert hoved(["kopier", str(kort), "-o", str(tmp_path / "cli"), "--verifiser"]) == 0
+    assert (tmp_path / "cli" / "Råfiler" / s.id / "00000001.WAV").exists()
