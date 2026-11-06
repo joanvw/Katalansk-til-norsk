@@ -40,6 +40,7 @@ from .wav import WavFeil, WavInfo, les_wav_info
 SE_LOG = "SE_LOG.BIN"
 _TAKE_RE = re.compile(r"^\d{8}\.wav$", re.IGNORECASE)
 _MAKS_MARKORER = 125
+EGNE_MAPPER = {"X-Live eksport", "Råfiler"}
 
 
 @dataclass
@@ -157,7 +158,9 @@ def finn_sesjoner(rot: str, maks_dybde: int = 3) -> list[Sesjon]:
     for mappe, undermapper, filer in os.walk(rot):
         if mappe.count(os.sep) - basis_dybde >= maks_dybde:
             undermapper[:] = []
-        undermapper[:] = sorted(d for d in undermapper if not d.startswith("."))
+        # Hopp over skjulte mapper og appens egne utmapper (eksport/sikkerhetskopi).
+        undermapper[:] = sorted(d for d in undermapper
+                                if not d.startswith(".") and d not in EGNE_MAPPER)
         if any(_TAKE_RE.match(f) for f in filer):
             try:
                 funnet.append(les_sesjon(mappe))
