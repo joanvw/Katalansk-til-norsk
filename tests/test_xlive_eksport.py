@@ -233,3 +233,35 @@ def test_eksport_med_raakopi_og_cli(kort, tmp_path):
     assert os.path.exists(os.path.join(mappe, "01 Spor 01.wav"))
     assert hoved(["kopier", str(kort), "-o", str(tmp_path / "cli"), "--verifiser"]) == 0
     assert (tmp_path / "cli" / "Råfiler" / s.id / "00000001.WAV").exists()
+    # Sikkerhetskopi lagret på selve kortet skal ikke telle som et nytt opptak.
+    assert hoved(["kopier", str(kort), "-o", str(kort / "X-Live eksport")]) == 0
+    assert len(finn_sesjoner(str(kort))) == 1
+
+
+# --------------------------------------------------------------------------
+# iPad: veiviser i terminalen og enkeltfil (.pyz)
+# --------------------------------------------------------------------------
+
+def test_veiviser_med_svar(kort, tmp_path, monkeypatch):
+    from xlive_eksport import veiviser
+    pinne = tmp_path / "scener"
+    pinne.mkdir()
+    (pinne / "Konsert.scn").write_text(SCENE, encoding="utf-8")
+    monkeypatch.chdir(pinne)                 # scenen finnes i gjeldende mappe
+    ut = tmp_path / "ut"
+    svar = iter([str(kort), "", "1", str(ut), "", "", "n", "n", "j"])
+    utskrift = []
+    assert veiviser.kjor(lambda _: next(svar), utskrift.append) == 0
+    (mappe,) = [d for d in os.listdir(ut)]
+    assert "01 Kick.wav" in os.listdir(ut / mappe)
+    assert any("Ferdig" in l for l in utskrift)
+
+
+def test_pyz_kjorer(kort, tmp_path):
+    import subprocess
+    from xlive_eksport.bygg import bygg
+    pyz = bygg(str(tmp_path / "xlive_eksport.pyz"))
+    r = subprocess.run([sys.executable, "-I", pyz, "liste", str(kort)],
+                       capture_output=True, text=True, cwd=str(tmp_path))
+    assert r.returncode == 0, r.stderr
+    assert "Lørdag" in r.stdout

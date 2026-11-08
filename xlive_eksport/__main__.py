@@ -102,9 +102,19 @@ def hoved(argv: list[str] | None = None) -> int:
     e.add_argument("--verifiser", action="store_true", help="med --kopier-raa: sjekk kopien byte for byte")
 
     under.add_parser("gui", help="åpne grafisk brukergrensesnitt")
+    under.add_parser("veiviser", help="spør steg for steg i terminalen (iPad: a-Shell/Pythonista)")
 
     a = p.parse_args(argv)
+    if a.kommando == "veiviser":
+        from .veiviser import kjor
+        return kjor()
     if a.kommando in (None, "gui"):
+        try:
+            import tkinter  # noqa: F401
+        except ImportError:
+            # Ingen vinduer (f.eks. iPad) → veiviser i terminalen.
+            from .veiviser import kjor
+            return kjor()
         from .gui import start
         start()
         return 0

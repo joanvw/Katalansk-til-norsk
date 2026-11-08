@@ -32,10 +32,51 @@ python -m xlive_eksport eksporter -o D:\Opptak --scene auto --kopier-raa
 Uten mappe letes det automatisk på USB. `--scene auto` bruker nyeste
 `.scn` på USB-pinnen.
 
+## Kjøre på iPad
+
+Vinduet (tkinter) finnes ikke på iPad, så der brukes en **veiviser** i
+terminalen som spør steg for steg. Den starter automatisk.
+
+**Dette trenger du**
+* Appen **a-Shell** (gratis i App Store, har Python innebygd). Pythonista
+  eller Pyto fungerer også.
+* En **USB-C-kortleser** til SD-kortet (eller en USB-C-hub med kortleser).
+* Helst en **ekstern SSD**: 32 spor × 2 timer i 24 bit er ca. 33 GB.
+  Veiviseren sjekker ledig plass før den starter.
+
+**Første gang**
+1. Legg `xlive_eksport.pyz` i a-Shell-mappen: i Filer-appen ligger den under
+   *På min iPad → a-Shell* (lagre den dit fra AirDrop, e-post eller iCloud
+   Drive). Filen lages med `python -m xlive_eksport.bygg` på en datamaskin.
+   * Alternativ: last ned repoet som ZIP fra GitHub i Safari, pakk ut i Filer,
+     og bruk `python -m xlive_eksport` i den mappen i stedet.
+
+**Hver gang**
+1. Sett SD-kortet i kortleseren og koble den til iPaden.
+2. Åpne a-Shell og skriv:
+   ```
+   pickFolder
+   ```
+   Velg SD-kortet i vinduet som dukker opp. Nå står du på kortet.
+3. Start appen:
+   ```
+   python ~/Documents/xlive_eksport.pyz
+   ```
+4. Trykk Enter på spørsmålene for å bruke standardvalgene. Finnes det en
+   `.scn`-fil på kortet eller i a-Shell-mappen, foreslås den automatisk (lagre
+   scenen fra miksebordet til samme SD-kort eller en USB-pinne og kopier den over).
+5. Sporene havner i mappen `X-Live eksport` på kortet (eller der du valgte).
+   Åpne dem i Filer, i Logic Pro for iPad, Cubasis eller LumaFusion, eller
+   flytt dem til maskinen med Pro Tools.
+
+Tips: skriv `bookmark kort` etter `pickFolder`, så holder det med `jump kort`
+neste gang.
+
 ## Kom i gang
 
 ```bash
 python -m xlive_eksport            # grafisk vindu (velg kort, scene og målmappe)
+python -m xlive_eksport veiviser   # spør steg for steg i terminalen (iPad)
 ```
 
 eller fra kommandolinjen:
